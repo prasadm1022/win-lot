@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "win-lot",
+  "main": "worker/src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": "./web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "win-lot",
+      // Replace with the id printed by `npx wrangler d1 create win-lot` before the first remote deploy.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "triggers": {
+    // 14:30 UTC = 20:00 Asia/Colombo (after the evening draws); 16:30 UTC retry.
+    "crons": ["30 14 * * *", "30 16 * * *"]
+  }
+  // Secret (not stored here): ADMIN_TOKEN  ->  npx wrangler secret put ADMIN_TOKEN
+}

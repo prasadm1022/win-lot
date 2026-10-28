@@ -1,0 +1,27 @@
+{
+  "name": "win-lot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sri Lankan lottery (NLB + DLB) history, statistics and next-draw picks on Cloudflare Workers + D1",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-web.mjs",
+    "dev": "wrangler dev",
+    "dev:cron": "wrangler dev --test-scheduled",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check:model": "node scripts/check-model.mjs",
+    "db:migrate:local": "wrangler d1 execute win-lot --local --file migrations/0001_schema.sql",
+    "db:seed:local": "node scripts/seed.mjs --local",
+    "db:migrate:remote": "wrangler d1 execute win-lot --remote --file migrations/0001_schema.sql",
+    "db:seed:remote": "node scripts/seed.mjs --remote",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261028.1",
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5",
+    "wrangler": "^4.154.0"
+  }
+}

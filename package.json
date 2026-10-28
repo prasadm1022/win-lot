@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit",
     "update": "tsx scripts/update.ts",
     "update:backfill-dlb": "tsx scripts/update.ts --backfill-dlb",
+    "jackpots": "tsx scripts/jackpots.ts",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {

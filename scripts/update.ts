@@ -2,6 +2,7 @@
 // Daily refresh (run by .github/workflows/update.yml): scrape the latest page(s) of every lottery,
 // merge new draws into data/draws/<id>.json (dedupe on drawNo, newest first, never delete) and
 // prepend one entry per lottery to data/fetch-log.json (newest first, capped at 100).
+// Then a light, non-fatal jackpot step (lib/jackpot-sources.ts): data/prizes/<id>.json, data/jackpots.json.
 // Exit code 1 only if EVERY lottery failed. One failing lottery never blocks the others.
 //
 //   npm run update                      latest page per lottery
@@ -10,6 +11,14 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { LOTTERIES } from "../lib/lotteries";
+import {
+  readWinnersDirectory,
+  refreshNlbPrizes,
+  snapshotDlbJackpots,
+  updateDirectory,
+  writeJackpots,
+} from "../lib/jackpot-sources";
+import type { Directory } from "../lib/jackpots";
 import { dlbLatestLoader, scrapeLottery, sleep } from "../lib/scrape";
 import type { DrawSummary, FetchRun } from "../lib/types";
 
@@ -80,6 +89,8 @@ async function main() {
     await sleep(500);
   }
 
+  await updateJackpots();
+
   // Newest first: entries of this run in lottery order on top, ids ascending as in the old fetch_log.
   for (const e of entries) e.id = nextId++;
   writeAtomic(logPath, JSON.stringify([...entries.reverse(), ...log].slice(0, LOG_CAP), null, 2) + "\n");
@@ -88,6 +99,30 @@ async function main() {
   const inserted = entries.reduce((n, e) => n + e.inserted, 0);
   console.log(`done: ${entries.length - failed}/${entries.length} ok, ${inserted} new draws`);
   if (entries.length && failed === entries.length) process.exit(1);
+}
+
+/**
+ * Light jackpot step (non-fatal): NLB prize tables of new draws and the 3 newest ones, NLB winners directory
+ * page 1, DLB next-jackpot snapshot, then data/jackpots.json. (docs/JACKPOT-WINS.md: npm run jackpots.)
+ */
+async function updateJackpots() {
+  const opts = { dataDir: DATA, log: (l: string) => console.log(`jackpots: ${l}`) };
+  const step = async (name: string, fn: () => Promise<unknown>) => {
+    try {
+      await fn();
+    } catch (err) {
+      console.log(`jackpots: ${name} failed (ignored): ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+  for (const lottery of LOTTERIES.filter((l) => l.board === "NLB" && (!only || only.includes(l.id)))) {
+    await step(`prizes ${lottery.id}`, () => refreshNlbPrizes(lottery, { ...opts, recent: 3 }));
+  }
+  let directory: Directory | undefined;
+  await step("winners directory", async () => {
+    directory = await updateDirectory(opts, await readWinnersDirectory(opts));
+  });
+  await step("dlb next jackpots", () => snapshotDlbJackpots(opts));
+  await step("jackpots.json", async () => writeJackpots(opts, directory));
 }
 
 main().catch((err) => {

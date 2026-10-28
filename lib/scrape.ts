@@ -20,7 +20,7 @@ const DLB_LATEST = "https://www.dlb.lk/result/11/"; // any DLB result page lists
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function fetchText(url: string, init: RequestInit = {}, cookie?: string): Promise<string> {
+export async function fetchText(url: string, init: RequestInit = {}, cookie?: string): Promise<string> {
   const headers = new Headers(init.headers);
   headers.set("User-Agent", USER_AGENT);
   if (cookie) headers.set("Cookie", cookie);

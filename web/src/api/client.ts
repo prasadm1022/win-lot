@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import type { DrawsPage, Lottery, Prediction, Stats, StatsWindow, Status } from './types'
 import { mockDraws, mockLotteries, mockPrediction, mockStats, mockStatus } from '../mocks/data'
 

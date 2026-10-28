@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import type { CSSProperties } from 'react'
 import { ZODIAC_GLYPH } from '../lib/lotteryMeta'
 import { bonusText } from '../lib/format'

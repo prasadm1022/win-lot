@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Backfill the full available history of all seven lotteries.
 
 Usage (from repo root):

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // HTML parsers for NLB and DLB result pages. Regex port of scraper/parsers.py (no DOM dependency).
 
 import type { Lottery } from "./lotteries";

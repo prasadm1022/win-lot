@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """win-lot prediction model (reference implementation; worker/src/model.ts is a 1:1 port).
 
 Lottery draws are random. This is a transparent statistical heuristic, not a forecast.

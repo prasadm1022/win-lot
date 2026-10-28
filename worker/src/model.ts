@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // win-lot prediction model: 1:1 port of scraper/model.py (keep both in sync; see `npm run check:model`).
 // Lottery draws are random; this is a transparent statistical heuristic, not a forecast.
 

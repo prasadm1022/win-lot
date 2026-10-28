@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // Deterministic mock data for all 7 lotteries, shaped exactly like the API contract.
 // Used when /api is unreachable or when the page is opened with ?mock=1.
 

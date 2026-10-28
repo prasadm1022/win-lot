@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import type { Prediction } from '../api/types'
 
 export function Backtest({ backtest, mainCount }: { backtest: Prediction['backtest']; mainCount: number }) {

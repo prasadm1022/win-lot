@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // Daily refresh: fetch the latest page of every lottery, upsert new draws, recompute predictions.
 
 import { logFetch, recomputePrediction, upsertDraws } from "./db";

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // win-lot Worker: JSON API under /api/*, static UI from web/dist (ASSETS), daily cron refresh.
 
 import { drawToApi, loadDraws, recomputePrediction, rowToDraw } from "./db";

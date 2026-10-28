@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 const DATE_FMT = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 const DATE_SHORT = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' })
 const DATETIME_FMT = new Intl.DateTimeFormat('en-GB', {

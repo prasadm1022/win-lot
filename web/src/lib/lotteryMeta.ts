@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // Presentation-only metadata keyed by lottery id (names in Sinhala/Tamil, accent hue).
 // Anything structural (counts, ranges) comes from the API, never from here.
 

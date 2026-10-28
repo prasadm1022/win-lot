@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Write Python model outputs for the TS parity test.
 
     python scraper/export_parity.py                 # small fixture -> worker/test/fixtures/model-parity.json

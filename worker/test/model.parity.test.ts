@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // Python (scraper/model.py) vs TypeScript (worker/src/model.ts) parity on real data.
 // Default: worker/test/fixtures/model-parity.json (last 260 draws per lottery).
 // `npm run check:model` sets PARITY_FILE to a full-history export.

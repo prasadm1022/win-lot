@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import { useCallback, useState, type ReactNode } from 'react'
 
 export interface TooltipState {

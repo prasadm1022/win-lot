@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // Builds the UI (web/) if present. Tolerates a missing web/ so the Worker can be built/tested alone.
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";

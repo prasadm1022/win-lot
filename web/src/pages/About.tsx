@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import { useEffect } from 'react'
 import { api } from '../api/client'
 import { useQuery } from '../lib/useQuery'

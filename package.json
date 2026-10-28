@@ -2,6 +2,7 @@
   "name": "win-lot",
   "version": "1.0.0",
   "private": true,
+  "license": "Apache-2.0",
   "description": "Sri Lankan lottery (NLB + DLB) history, statistics and next-draw picks on Cloudflare Workers + D1",
   "type": "module",
   "scripts": {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import type { CSSProperties } from 'react'
 
 export function Skeleton({ w = '100%', h = 14, style }: { w?: string | number; h?: string | number; style?: CSSProperties }) {

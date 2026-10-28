@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // Applies seed/*.sql to D1 in order: node scripts/seed.mjs --local | --remote
 import { readdirSync } from "node:fs";
 import { execSync } from "node:child_process";

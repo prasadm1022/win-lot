@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // Lottery metadata. Mirrors scraper/lotteries.py and the `lotteries` D1 table (seed/0000_lotteries.sql).
 
 export type Board = "NLB" | "DLB";

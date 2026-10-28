@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // Mirrors docs/ARCHITECTURE.md "API contract". Do not change without updating the Worker.
 
 export type Board = 'NLB' | 'DLB'

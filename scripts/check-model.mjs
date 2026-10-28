@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // Python <-> TypeScript model parity check over the FULL local history (data/lottery.sqlite).
 // 1. scraper/export_parity.py writes Python predictions for every lottery to a temp JSON file.
 // 2. vitest runs worker/test/model.parity.test.ts against that file (PARITY_FILE).

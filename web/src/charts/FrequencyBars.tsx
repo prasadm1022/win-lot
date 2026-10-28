@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import type { Stats } from '../api/types'
 import { niceTicks, useTooltip } from './useTooltip'
 

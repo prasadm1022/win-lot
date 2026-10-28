@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // D1 access helpers.
 
 import type { Lottery } from "./lotteries";

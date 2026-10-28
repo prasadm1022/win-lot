@@ -113,3 +113,11 @@ On each run `scheduled()` (in `worker/src/scrape.ts`):
 A lottery that fails (site down, markup change) logs `status=error` and does not affect the others.
 `POST /api/admin/refresh` (header `x-admin-token`) runs the same refresh on demand
 (`?lottery=<id>` for one lottery).
+
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE). See [NOTICE](NOTICE) for attribution
+and for the status of the scraped NLB/DLB result data, which is not covered by the license.
+
+Lottery draws are random. The picks are statistical patterns for entertainment only and are
+provided "AS IS", without warranty of any kind. Please play responsibly.

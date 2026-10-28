@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Offline analysis: statistics, randomness checks, predictions and a walk-forward backtest.
 
     scraper/.venv/Scripts/python scraper/analysis.py   ->  data/analysis_report.md

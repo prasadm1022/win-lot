@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """HTML parsers for NLB and DLB result pages (ported 1:1 to worker/src/parsers.ts).
 
 Every parser returns raw rows: {draw_no, draw_date, letter, numbers, extra}

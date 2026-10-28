@@ -1,0 +1,13 @@
+win-lot
+Copyright 2026 Prasad Madusanka
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Lottery results in data/, seed/ and worker/test/fixtures/ are public draw results
+published by the National Lotteries Board (https://www.nlb.lk) and the Development
+Lotteries Board (https://www.dlb.lk) of Sri Lanka. They are not covered by this
+license and remain subject to the terms of their publishers. This project is not
+affiliated with or endorsed by NLB or DLB.
+
+Predictions produced by this software are statistical heuristics for entertainment
+only. Lottery draws are random; see the Disclaimer section of LICENSE (sections 7-8).

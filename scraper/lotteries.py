@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Lottery metadata (mirrors the `lotteries` D1 table and worker/src/lotteries.ts).
 
 Formats were verified against the live NLB / DLB markup on 2026-10-28:

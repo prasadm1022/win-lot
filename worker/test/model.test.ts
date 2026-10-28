@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import { describe, expect, it } from "vitest";
 import type { Lottery } from "../src/lotteries";
 import { backtest, fnv1a, mulberry32, nextDrawDate, predict, quantile, r4 } from "../src/model";

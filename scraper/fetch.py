@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Polite HTTP fetching with retries, the NLB cookie challenge and a resumable on-disk cache.
 
 Cache layout: scraper/.cache/<YYYY-MM-DD>/<sha1(method+url+body)>.html

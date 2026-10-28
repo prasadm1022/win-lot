@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // Descriptive statistics for GET /api/lotteries/:id/stats (see docs/ARCHITECTURE.md).
 
 import type { Lottery } from "./lotteries";

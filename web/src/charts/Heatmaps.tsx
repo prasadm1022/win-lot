@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import type { CSSProperties } from 'react'
 import type { Prediction, Stats } from '../api/types'
 

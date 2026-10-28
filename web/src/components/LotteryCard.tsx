@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import type { Lottery, Prediction } from '../api/types'

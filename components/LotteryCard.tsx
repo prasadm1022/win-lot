@@ -83,7 +83,7 @@ export function LotteryCard({ lottery, prediction, sums }: Props) {
               {fmtDate(prediction.nextDrawDate)} · <Countdown dateIso={prediction.nextDrawDate} variant="inline" />
             </>
           ) : (
-            '—'
+            '-'
           )}
         </span>
         <Sparkline values={sums} label="Sum of numbers, last 30 draws" />

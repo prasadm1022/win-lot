@@ -127,7 +127,7 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
               ))}
             </div>
           ) : (
-            <p className="muted small">No picks yet — they appear once draws have been recorded.</p>
+            <p className="muted small">No picks yet - they appear once draws have been recorded.</p>
           )}
           <div style={{ marginTop: 14 }}>
             <Disclaimer compact text={prediction?.disclaimer} />

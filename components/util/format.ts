@@ -19,7 +19,7 @@ export function parseDate(iso: string): Date {
 }
 
 export function fmtDate(iso: string | null | undefined): string {
-  if (!iso) return '—'
+  if (!iso) return '-'
   const d = parseDate(iso)
   return Number.isNaN(d.getTime()) ? iso : DATE_FMT.format(d)
 }
@@ -31,7 +31,7 @@ export function fmtDateShort(iso: string): string {
 
 /** Date-times are shown in Sri Lanka time (the draws' own timezone). */
 export function fmtDateTime(iso: string | null | undefined): string {
-  if (!iso) return '—'
+  if (!iso) return '-'
   const d = new Date(iso)
   return Number.isNaN(d.getTime()) ? iso : DATETIME_FMT.format(d)
 }

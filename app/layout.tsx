@@ -8,8 +8,8 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'WinLot — Sri Lanka lottery statistics and picks',
-    template: '%s — WinLot',
+    default: 'WinLot - Sri Lanka lottery statistics and picks',
+    template: '%s - WinLot',
   },
   description:
     'Sri Lankan lottery results, statistics and statistical picks for NLB and DLB draws. For entertainment only; draws are random.',

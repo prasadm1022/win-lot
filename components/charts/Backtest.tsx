@@ -8,7 +8,7 @@ export function Backtest({ backtest, mainCount }: { backtest: Prediction['backte
   const rel = randomBaseline ? delta / randomBaseline : 0
   const verdict =
     Math.abs(rel) < 0.05
-      ? 'About the same as random — exactly what you expect from a fair lottery.'
+      ? 'About the same as random - exactly what you expect from a fair lottery.'
       : rel > 0
         ? `Slightly above random in this sample (+${(rel * 100).toFixed(0)}%). Small edges like this are usually noise.`
         : `Slightly below random in this sample (${(rel * 100).toFixed(0)}%). Patterns do not persist in random draws.`

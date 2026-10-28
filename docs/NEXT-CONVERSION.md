@@ -24,13 +24,13 @@ export const LOTTERY_IDS: string[]
 Types are in `lib/types.ts` (identical to the old API contract). Pages are server components that call
 these and pass plain props to client components. The window switcher receives all three Stats objects.
 History table: client-side pagination over a `draws` prop (≈1,900 rows max; fine) or over
-`/data/<id>/draws.json` emitted to `public/` by the build — UI engineer's choice; data engineer also emits
+`/data/<id>/draws.json` emitted to `public/` by the build - UI engineer's choice; data engineer also emits
 `public/data/<id>.json` ({lottery, draws, prediction}) for open-data consumers.
 
 ## Data files
-- `data/lotteries.json` — metadata (array, lotteries table rows in camelCase)
-- `data/draws/<id>.json` — `DrawSummary[]`, newest first
-- `data/fetch-log.json` — `FetchRun[]`, newest first, last 100
+- `data/lotteries.json` - metadata (array, lotteries table rows in camelCase)
+- `data/draws/<id>.json` - `DrawSummary[]`, newest first
+- `data/fetch-log.json` - `FetchRun[]`, newest first, last 100
 Predictions/stats are computed at build from these (deterministic, seeded; generatedAt = newest draw date run time).
 
 ## Routes

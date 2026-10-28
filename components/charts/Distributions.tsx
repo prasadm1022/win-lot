@@ -21,7 +21,7 @@ function Bars({ rows, total, ariaLabel }: { rows: Row[]; total: number; ariaLabe
             <span className="fill" style={{ width: `${(r.count / max) * 100}%` }} />
           </span>
           <span className="val">
-            {total ? fmtPct(r.count / total) : '—'}
+            {total ? fmtPct(r.count / total) : '-'}
             <span className="sr-only">, {r.count} draws</span>
           </span>
         </div>

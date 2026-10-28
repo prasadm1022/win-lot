@@ -37,7 +37,7 @@ export function StatsPanel({ lottery, stats }: Props) {
   const [win, setWin] = useState<StatsWindow>('all')
   const s = stats[win]
   const { mainCount, mainMin, mainMax } = lottery
-  const joinTop = (xs: number[]) => (xs.length ? xs.slice(0, 5).join(' · ') : '—')
+  const joinTop = (xs: number[]) => (xs.length ? xs.slice(0, 5).join(' · ') : '-')
 
   return (
     <section aria-labelledby="stats-title">

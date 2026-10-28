@@ -3,9 +3,10 @@
 Sri Lankan lottery (NLB + DLB) results history, statistics and "next draw" picks for
 Dhana Nidhanaya, Mega Power, Govisetha (NLB) and Ada Kotipathi, Super Ball, Shanida, Kapruka (DLB).
 
-One Cloudflare **Worker** serves the UI (`web/dist` via the `ASSETS` binding), the JSON API (`/api/*`)
-and a daily **cron** that scrapes new results into **D1** and recomputes predictions.
-Design, sources, schema and the API contract: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+A **pure static Next.js site** (`output: 'export'`) on the **Cloudflare free plan**. No server, no
+database: the draw history lives in `data/*.json` in this repo, a **GitHub Actions cron** scrapes new
+results daily and commits them, and every push triggers a Cloudflare build that recomputes all
+statistics and picks at build time. Design and sources: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 > Lottery draws are random. The picks are a transparent statistical heuristic for entertainment
 > and are backtested against random chance; they do not improve anyone's odds.
@@ -13,106 +14,74 @@ Design, sources, schema and the API contract: [`docs/ARCHITECTURE.md`](docs/ARCH
 ## Layout
 
 ```
-scraper/      Python backfill scraper, model reference implementation, offline analysis
-  backfill.py   full-history scrape -> data/lottery.sqlite, migrations/0001_schema.sql, seed/*.sql
-  analysis.py   statistics + walk-forward backtest -> data/analysis_report.md
-  model.py      prediction model (worker/src/model.ts is a 1:1 port)
-worker/       TypeScript Worker (API, cron, parsers, model, stats) + vitest tests
-migrations/   D1 schema
-seed/         D1 seed data (lotteries, draws, initial predictions) - the historic archive
-data/         lottery.sqlite (local copy of all scraped draws) and analysis_report.md
-web/          UI (Vite + React), built to web/dist
+app/, components/, styles/   Next.js App Router UI (server components read lib/data.ts at build)
+lib/          data.ts (build-time data API), model.ts, stats.ts, parsers.ts, scrape.ts, lotteries.ts, types.ts
+data/         lotteries.json, draws/<id>.json (newest first), fetch-log.json (last 100 runs) - the archive
+scripts/      update.ts (daily scrape + merge), export-public.ts (prebuild: public/data/*.json)
+test/         vitest: parsers (real-page fixtures), model, frozen Python parity, lib/data
+.github/      workflows/update.yml (daily cron), workflows/ci.yml (typecheck + test + build)
+wrangler.jsonc  static-assets-only Worker config (serves ./out)
 ```
 
-`data/lottery.sqlite` and `seed/*.sql` are the archive: NLB only publishes its latest ~208 draws, so
-history scraped once cannot be scraped again. Re-running the backfill merges into the SQLite file
-(`INSERT OR REPLACE`), it never drops rows.
+`data/draws/*.json` is the archive of record: NLB only publishes its latest ~208 draws, so history
+scraped once cannot be scraped again. The update script only ever adds draws, never deletes.
 
-## Prerequisites
+## Setup and development
 
-- Node.js 20+ and npm
-- Python 3.12 (only for the scraper / analysis)
-- A Cloudflare account (for deploy)
+Requires Node.js 22+.
 
 ```sh
 npm install
-# Python venv (Windows paths shown; use scraper/.venv/bin/python on macOS/Linux)
-python -m venv scraper/.venv
-scraper/.venv/Scripts/python -m pip install -r scraper/requirements.txt
-```
-
-## Scrape and analyse (optional - seed files are already committed)
-
-```sh
-scraper/.venv/Scripts/python scraper/backfill.py          # ~10 min, polite (sequential, 0.5 s delay)
-scraper/.venv/Scripts/python scraper/backfill.py --sql-only   # regenerate SQL from data/lottery.sqlite
-scraper/.venv/Scripts/python scraper/analysis.py          # writes data/analysis_report.md
-```
-
-Raw pages are cached per day in `scraper/.cache/` so an interrupted run resumes.
-
-## Run locally
-
-```sh
-npm run build              # builds web/ (or writes a placeholder page if web/ is missing)
-npm run db:migrate:local   # schema into the local D1 (.wrangler/state)
-npm run db:seed:local      # all seed/*.sql files, in order
-npm run dev                # http://localhost:8787  (API under /api/*)
-```
-
-Test the cron locally:
-
-```sh
-npm run dev:cron           # wrangler dev --test-scheduled
-curl "http://localhost:8787/cdn-cgi/handler/scheduled?cron=30+14+*+*+*"   # /__scheduled is swallowed by the SPA asset fallback
-curl http://localhost:8787/api/status
-```
-
-Admin refresh locally: put `ADMIN_TOKEN=<any-local-value>` in `.dev.vars` (gitignored), then
-`curl -X POST -H "x-admin-token: <value>" http://localhost:8787/api/admin/refresh`.
-
-## Tests
-
-```sh
-npm test               # vitest: parsers (real-page fixtures) + model + Python/TS parity fixture
+npm run dev          # http://localhost:3000
+npm test             # vitest
 npm run typecheck
-npm run check:model    # Python vs TypeScript model parity over the FULL local history
+npm run build        # prebuild writes public/data/, then next build -> out/
 ```
 
-## Deploy to Cloudflare
+## Updating the data
 
 ```sh
-npx wrangler login
-npx wrangler d1 create win-lot          # copy the printed database_id
-#   -> paste it into wrangler.jsonc  d1_databases[0].database_id
-npm run db:migrate:remote
-npm run db:seed:remote                  # ~20 files; each is a small batched INSERT OR IGNORE
-npx wrangler secret put ADMIN_TOKEN     # choose a long random value; never commit it
-npm run deploy                          # builds web/ and deploys the Worker + assets + cron
+npm run update                       # scrape the latest page of every lottery, merge into data/
+npm run update -- --backfill-dlb     # DLB: page further back until a page holds only known draws
+npm run update -- --only=kapruka,shanida
 ```
 
-Then open the `*.workers.dev` URL (or attach a custom domain in the dashboard).
+Per lottery: NLB `results/<slug>` (answers the `human` cookie challenge for every URL) or the DLB
+latest page + `pagination_re` with its `resultID`. New draws are deduped on `drawNo` and merged newest
+first; one fetch-log entry per lottery is prepended to `data/fetch-log.json` (capped at 100).
+A failing lottery is logged with `status: "error"` and does not block the others; the script exits
+non-zero only when **all** lotteries fail.
 
-## How the daily refresh works
+## How the daily cron works
 
-`wrangler.jsonc` registers two cron triggers (UTC):
+`.github/workflows/update.yml` runs at `30 14 * * *` (20:00 Asia/Colombo, after the evening draws)
+and `30 16 * * *` (retry), plus manual `workflow_dispatch` (optional DLB backfill). It runs
+`npm ci && npm run update` and commits `data/` as `github-actions[bot]` **only if it changed**.
+That push auto-triggers the Cloudflare build, so the site is rebuilt at most twice a day by the cron.
+If pushes are rejected, check repo Settings -> Actions -> General -> Workflow permissions (Read and write).
 
-- `30 14 * * *` - 20:00 Asia/Colombo, after the evening draws
-- `30 16 * * *` - 22:00 Asia/Colombo, retry for late publications
+## Deploy (Cloudflare free plan)
 
-On each run `scheduled()` (in `worker/src/scrape.ts`):
+**Option A - Workers static assets (recommended).** Dashboard -> Workers & Pages -> Create ->
+Import a repository -> this repo. Build command `npm run build`, deploy command `npx wrangler deploy`
+(uses `wrangler.jsonc`: name `win-lot`, `assets.directory: ./out`, `not_found_handling: 404-page`;
+no Worker script, no D1, no cron). Manual deploy: `npx wrangler login`, then `npm run deploy`.
 
-1. NLB: fetches `https://www.nlb.lk/results/<slug>` (answering the `human` cookie challenge) and parses
-   the results table (latest ~208 draws).
-2. DLB: fetches one `/result/<id>/` page (it lists the latest draw of every DLB lottery and the
-   `resultID`) and then `POST result/pagination_re` `pageId=0` per lottery (next 12 draws).
-3. Upserts with `INSERT OR IGNORE` (existing draws are never changed), recomputes the lottery's
-   prediction when new draws arrived, and writes one `fetch_log` row per lottery
-   (visible at `/api/status`).
+**Option B - Cloudflare Pages.** Connect the repo; build command `npm run build`, build output
+directory `out`, environment variable `NODE_VERSION=22`.
 
-A lottery that fails (site down, markup change) logs `status=error` and does not affect the others.
-`POST /api/admin/refresh` (header `x-admin-token`) runs the same refresh on demand
-(`?lottery=<id>` for one lottery).
+Either way, every push to the production branch (including the cron data commit) triggers a build.
+
+### Free-plan limits (verify current values on the Cloudflare and GitHub pricing pages)
+
+| Item | Free plan | win-lot usage |
+|---|---|---|
+| Static asset requests (Workers assets / Pages) | free, unlimited | all traffic |
+| Worker script invocations | 100,000/day | none (assets only, no `main`) |
+| Files per deployment | 20,000 files, 25 MiB per file | a few dozen files, largest < 1 MB |
+| Pages builds | 500/month | <= 2/day from cron (~60/month) + your pushes |
+| Workers Builds | 3,000 build minutes/month | ~1-2 min per build |
+| GitHub Actions | free for public repos (2,000 min/month for private) | ~1 min x 2/day |
 
 ## License
 

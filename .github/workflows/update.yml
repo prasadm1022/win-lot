@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: Apache-2.0
+# Daily data refresh. 14:30 UTC = 20:00 Asia/Colombo (after the evening draws); 16:30 UTC retry.
+# A commit to data/ triggers the Cloudflare (Workers Builds / Pages) build of the static site.
+name: update-data
+
+on:
+  schedule:
+    - cron: "30 14 * * *"
+    - cron: "30 16 * * *"
+  workflow_dispatch:
+    inputs:
+      backfill_dlb:
+        description: "Page further back on DLB (--backfill-dlb)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Scrape and merge new draws
+        run: npm run update -- ${{ inputs.backfill_dlb && '--backfill-dlb' || '' }}
+      - name: Commit and push if data changed
+        run: |
+          if git diff --quiet -- data/; then
+            echo "no data changes"; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git commit -m "data: daily update $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push

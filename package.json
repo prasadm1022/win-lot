@@ -1,28 +1,34 @@
 {
   "name": "win-lot",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "license": "Apache-2.0",
-  "description": "Sri Lankan lottery (NLB + DLB) history, statistics and next-draw picks on Cloudflare Workers + D1",
+  "description": "Sri Lankan lottery (NLB + DLB) history, statistics and next-draw picks as a static Next.js site on the Cloudflare free plan",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "build": "node scripts/build-web.mjs",
-    "dev": "wrangler dev",
-    "dev:cron": "wrangler dev --test-scheduled",
-    "typecheck": "tsc --noEmit",
+    "dev": "next dev",
+    "prebuild": "tsx scripts/export-public.ts",
+    "build": "next build",
     "test": "vitest run",
-    "check:model": "node scripts/check-model.mjs",
-    "db:migrate:local": "wrangler d1 execute win-lot --local --file migrations/0001_schema.sql",
-    "db:seed:local": "node scripts/seed.mjs --local",
-    "db:migrate:remote": "wrangler d1 execute win-lot --remote --file migrations/0001_schema.sql",
-    "db:seed:remote": "node scripts/seed.mjs --remote",
+    "typecheck": "tsc --noEmit",
+    "update": "tsx scripts/update.ts",
+    "update:backfill-dlb": "tsx scripts/update.ts --backfill-dlb",
     "deploy": "npm run build && wrangler deploy"
   },
+  "dependencies": {
+    "next": "^16",
+    "react": "^19",
+    "react-dom": "^19"
+  },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20261028.1",
-    "@types/node": "^26.6.5",
-    "typescript": "^7.0.2",
-    "vitest": "^5.0.5",
-    "wrangler": "^4.154.0"
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tsx": "^4",
+    "typescript": "^5",
+    "vitest": "^5.0.5"
   }
 }

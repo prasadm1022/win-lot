@@ -2,19 +2,16 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { LOTTERY_IDS, getDraws, getJackpotStatus, getLottery, getPrediction, getStats, getStatus } from '@/lib/data'
-import type { Prediction, Stats, StatsWindow } from '@/lib/types'
+import { LOTTERY_IDS, getDraws, getJackpotStatus, getLottery, getPrediction, getStatus } from '@/lib/data'
+import type { Prediction } from '@/lib/types'
 import { fmtDate, fmtDateTime, fmtInt } from '@/components/util/format'
 import { metaFor } from '@/components/util/lotteryMeta'
 import { BallRow } from '@/components/Ball'
 import { Countdown } from '@/components/Countdown'
 import { Disclaimer } from '@/components/Notices'
 import { StaleNotice } from '@/components/StaleNotice'
-import { StatsPanel } from '@/components/StatsPanel'
 import { HistoryTable } from '@/components/HistoryTable'
 import { HISTORY_PAGE as PAGE } from '@/components/util/constants'
-import { Backtest } from '@/components/charts/Backtest'
-import { NumberScoreHeatmap } from '@/components/charts/Heatmaps'
 import { PickCards } from '@/components/Picks'
 import { HowPicksAreMade } from '@/components/HowPicksAreMade'
 import { JackpotWins } from '@/components/JackpotWins'
@@ -58,8 +55,6 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
   const prediction = hasDraws ? safePrediction(id) : null
   const draws = hasDraws ? getDraws(id) : []
   const jackpots = getJackpotStatus(id)
-  const windows: StatsWindow[] = ['all', '500', '100']
-  const stats = Object.fromEntries(windows.map((w) => [w, getStats(id, w)])) as Record<StatsWindow, Stats>
   const status = getStatus()
   const { mainCount, mainMin, mainMax } = lottery
 
@@ -95,7 +90,7 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
 
       <StaleNotice newestDrawDate={lottery.lastDraw?.date ?? null} lastRun={status.lastRun} thresholdDays={9} />
 
-      {/* Picks + latest draw + honest backtest */}
+      {/* Picks + latest draw */}
       <div className="detail-top">
         <section className="card" aria-labelledby="picks-title">
           <div className="card-head">
@@ -149,29 +144,6 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
             )}
           </section>
 
-          <section className="card" aria-labelledby="bt-title">
-            <div className="card-head">
-              <div>
-                <p className="eyebrow">Honest check</p>
-                <h2 id="bt-title" style={{ fontSize: '1.2rem' }}>
-                  How the picks did on past draws
-                </h2>
-              </div>
-            </div>
-            {prediction?.backtestDetail ? (
-              <Backtest
-                detail={prediction.backtestDetail}
-                previous={prediction.previousModel ?? null}
-                liveCount={prediction.liveBalls?.count ?? null}
-                mainCount={mainCount}
-                mainMin={mainMin}
-                board={lottery.board}
-                checked={jackpots.checked}
-              />
-            ) : (
-              <p className="muted small">Backtest unavailable.</p>
-            )}
-          </section>
         </div>
       </div>
 
@@ -180,30 +152,6 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
 
       {/* Jackpot wins: the evidence the picks weigh first */}
       <JackpotWins status={jackpots} lottery={lottery} />
-
-      {/* Pattern score per number */}
-      <section className="card" aria-labelledby="heat-title">
-        <div className="card-head">
-          <div>
-            <p className="eyebrow">Model view</p>
-            <h2 id="heat-title">Number scores</h2>
-          </div>
-          <p className="card-sub">Pattern score, not a probability: how far the picks lean toward each number, scaled 0 to 100.</p>
-        </div>
-        {prediction ? (
-          <NumberScoreHeatmap
-            scores={prediction.numberScores}
-            mainMin={mainMin}
-            excluded={prediction.liveBalls?.excluded ?? []}
-            since={prediction.liveBalls?.since ?? null}
-          />
-        ) : (
-          <p className="muted small">Scores unavailable.</p>
-        )}
-      </section>
-
-      {/* Statistics with window switcher (all three windows precomputed) */}
-      <StatsPanel lottery={{ mainCount, mainMin, mainMax, letterKind: lottery.letterKind }} stats={stats} excluded={prediction?.liveBalls?.excluded ?? []} />
 
       {/* History */}
       <section className="card" aria-labelledby="hist-title">

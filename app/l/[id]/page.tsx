@@ -90,62 +90,57 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
 
       <StaleNotice newestDrawDate={lottery.lastDraw?.date ?? null} lastRun={status.lastRun} thresholdDays={9} />
 
-      {/* Picks + latest draw */}
-      <div className="detail-top">
-        <section className="card" aria-labelledby="picks-title">
-          <div className="card-head">
-            <div>
-              <p className="eyebrow">Picks for fun</p>
-              <h2 id="picks-title">Next draw picks</h2>
+      {/* Latest draw, then picks */}
+      <section className="card" aria-labelledby="latest-title">
+        <div className="card-head">
+          <h2 id="latest-title" style={{ fontSize: '1.2rem' }}>
+            Latest draw
+          </h2>
+          {lottery.lastDraw ? (
+            <p className="card-sub">
+              #{lottery.lastDraw.drawNo} · {fmtDate(lottery.lastDraw.date)}
+            </p>
+          ) : null}
+        </div>
+        {lottery.lastDraw ? (
+          <>
+            <BallRow
+              letter={lottery.lastDraw.letter}
+              numbers={lottery.lastDraw.numbers}
+              bonus={lottery.lastDraw.bonus}
+              bonusLabel={lottery.bonusLabel}
+              caption="Latest draw"
+            />
+            <div className="latest-jp">
+              <LatestDrawJackpot draw={lottery.lastDraw} latest={jackpots.latestDraw} id="latest-jp" />
             </div>
-            {prediction ? (
-              <p className="card-sub">
-                Generated {fmtDateTime(prediction.generatedAt)} from {fmtInt(prediction.basedOnDraws)} draws
-              </p>
-            ) : null}
+          </>
+        ) : (
+          <p className="muted small">No draws recorded yet.</p>
+        )}
+      </section>
+
+      <section className="card" aria-labelledby="picks-title">
+        <div className="card-head">
+          <div>
+            <p className="eyebrow">Picks for fun</p>
+            <h2 id="picks-title">Next draw picks</h2>
           </div>
           {prediction ? (
-            <>
-              {prediction.explanation?.summary ? <p className="picks-summary">{prediction.explanation.summary}</p> : null}
-              <PickCards prediction={prediction} lottery={lottery} />
-            </>
-          ) : (
-            <p className="muted small">No picks yet - they appear once draws have been recorded.</p>
-          )}
-        </section>
-
-        <div className="stack" style={{ gap: 18 }}>
-          <section className="card" aria-labelledby="latest-title">
-            <div className="card-head">
-              <h2 id="latest-title" style={{ fontSize: '1.2rem' }}>
-                Latest draw
-              </h2>
-              {lottery.lastDraw ? (
-                <p className="card-sub">
-                  #{lottery.lastDraw.drawNo} · {fmtDate(lottery.lastDraw.date)}
-                </p>
-              ) : null}
-            </div>
-            {lottery.lastDraw ? (
-              <>
-                <BallRow
-                  letter={lottery.lastDraw.letter}
-                  numbers={lottery.lastDraw.numbers}
-                  bonus={lottery.lastDraw.bonus}
-                  bonusLabel={lottery.bonusLabel}
-                  caption="Latest draw"
-                />
-                <div className="latest-jp">
-                  <LatestDrawJackpot draw={lottery.lastDraw} latest={jackpots.latestDraw} id="latest-jp" />
-                </div>
-              </>
-            ) : (
-              <p className="muted small">No draws recorded yet.</p>
-            )}
-          </section>
-
+            <p className="card-sub">
+              Generated {fmtDateTime(prediction.generatedAt)} from {fmtInt(prediction.basedOnDraws)} draws
+            </p>
+          ) : null}
         </div>
-      </div>
+        {prediction ? (
+          <>
+            {prediction.explanation?.summary ? <p className="picks-summary">{prediction.explanation.summary}</p> : null}
+            <PickCards prediction={prediction} lottery={lottery} />
+          </>
+        ) : (
+          <p className="muted small">No picks yet - they appear once draws have been recorded.</p>
+        )}
+      </section>
 
       {/* Method: the weights, their order and the maths */}
       {prediction ? <HowPicksAreMade prediction={prediction} lottery={lottery} /> : null}

@@ -18,6 +18,21 @@ interface Props {
   lottery: Pick<Lottery, 'mainCount' | 'mainMin' | 'mainMax' | 'letterKind'>
   /** All three windows are precomputed at build time; switching is instant. */
   stats: Record<StatsWindow, Stats>
+  /** Balls no longer in use (prediction.liveBalls.excluded): left out of the "least drawn" and "longest gap" lists. */
+  excluded?: number[]
+}
+
+/** [76, 77, 78, 79, 80] -> "76-80". */
+function ranges(ns: readonly number[]): string {
+  const s = [...ns].sort((a, b) => a - b)
+  const out: string[] = []
+  for (let i = 0; i < s.length; ) {
+    let j = i
+    while (j + 1 < s.length && s[j + 1] === s[j] + 1) j++
+    out.push(j > i ? `${s[i]}-${s[j]}` : `${s[i]}`)
+    i = j + 1
+  }
+  return out.join(', ')
 }
 
 function WindowSwitch({ value, onChange }: { value: StatsWindow; onChange: (w: StatsWindow) => void }) {
@@ -33,11 +48,16 @@ function WindowSwitch({ value, onChange }: { value: StatsWindow; onChange: (w: S
 }
 
 /** "Patterns in past draws": window switcher + every history chart. */
-export function StatsPanel({ lottery, stats }: Props) {
+export function StatsPanel({ lottery, stats, excluded = [] }: Props) {
   const [win, setWin] = useState<StatsWindow>('all')
   const s = stats[win]
   const { mainCount, mainMin, mainMax } = lottery
-  const joinTop = (xs: number[]) => (xs.length ? xs.slice(0, 5).join(' · ') : '-')
+  const dead = new Set(excluded)
+  // A ball that is no longer in the machine is neither "least drawn" nor "longest gap": it is simply not in use.
+  const joinTop = (xs: number[]) => {
+    const live = xs.filter((n) => !dead.has(n)).slice(0, 5)
+    return live.length ? live.join(' · ') : '-'
+  }
 
   return (
     <section aria-labelledby="stats-title">
@@ -56,31 +76,39 @@ export function StatsPanel({ lottery, stats }: Props) {
             <p className="value">{fmtInt(s.drawCount)}</p>
           </div>
           <div className="stat">
-            <p className="label">Hot</p>
+            <p className="label">Most drawn</p>
             <p className="value" style={{ fontSize: '1rem' }}>
               {joinTop(s.hot)}
             </p>
           </div>
           <div className="stat">
-            <p className="label">Cold</p>
+            <p className="label">Least drawn</p>
             <p className="value" style={{ fontSize: '1rem' }}>
               {joinTop(s.cold)}
             </p>
           </div>
           <div className="stat">
-            <p className="label">Overdue</p>
+            <p className="label">Longest gap since drawn</p>
             <p className="value" style={{ fontSize: '1rem' }}>
               {joinTop(s.overdue)}
             </p>
           </div>
         </div>
+        <p className="small muted" style={{ margin: '-8px 0 0' }}>
+          These describe past draws only. A lottery draw has no memory, so none of them changes the next draw.
+          {excluded.length
+            ? ` ${excluded.length === 1 ? 'Ball' : 'Balls'} ${ranges(excluded)} ${excluded.length === 1 ? 'is' : 'are'} no longer in use and ${
+                excluded.length === 1 ? 'is' : 'are'
+              } left out of these lists.`
+            : ''}
+        </p>
 
         <div className="card">
           <div className="card-head">
             <h3>Number frequency</h3>
             <p className="card-sub">How many times each number was drawn</p>
           </div>
-          <FrequencyBars stats={s} />
+          <FrequencyBars stats={s} excluded={excluded} />
         </div>
 
         <div className="card">

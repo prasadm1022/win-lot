@@ -14,6 +14,7 @@ import { LOTTERIES, type Lottery } from "./lotteries";
 import { fetchNlb, fetchText, sleep } from "./scrape";
 import {
   buildJackpots,
+  directoryMonth,
   isSuperPrizeListing,
   jackpotTier,
   parseDlbNextJackpots,
@@ -56,8 +57,13 @@ function writeAtomic(path: string, text: string) {
 
 const linesText = (rows: unknown[]) => `[\n${rows.map((r) => JSON.stringify(r)).join(",\n")}\n]\n`;
 
+/** Where a page is cached under `cacheDir`: a run with a cache reads it there instead of fetching it (tests put fixtures there). */
+export function pageCacheFile(cacheDir: string, url: string): string {
+  return join(cacheDir, createHash("sha1").update(url).digest("hex").slice(0, 16) + ".html");
+}
+
 async function getPage(url: string, opts: SourceOptions): Promise<string> {
-  const file = opts.cacheDir && join(opts.cacheDir, createHash("sha1").update(url).digest("hex").slice(0, 16) + ".html");
+  const file = opts.cacheDir && pageCacheFile(opts.cacheDir, url);
   if (file && existsSync(file)) return readFileSync(file, "utf8");
   await sleep(DELAY_MS);
   const html = url.includes("nlb.lk") ? await fetchNlb(url) : await fetchText(url);
@@ -124,8 +130,12 @@ export async function refreshNlbPrizes(
   return changed;
 }
 
-/** NLB winners directory: Super Prize cards per lottery (page 1 only, or every month page with `allMonths`). */
-export async function readWinnersDirectory(opts: SourceOptions & { allMonths?: boolean }): Promise<Directory> {
+/**
+ * NLB winners directory: Super Prize cards per lottery (page 1 only, or every month page with `allMonths`). Cards of
+ * page 1 are labelled with the month of this run in Sri Lanka (directoryMonth), never "latest": the publication rule
+ * then counts them as known from that month's end, so a card posted late cannot leak into earlier backtest steps.
+ */
+export async function readWinnersDirectory(opts: SourceOptions & { allMonths?: boolean; now?: Date }): Promise<Directory> {
   const byName = new Map(LOTTERIES.filter((l) => l.board === "NLB").map((l) => [l.name.toLowerCase(), l.id]));
   const out: Directory = {};
   const add = (html: string, label: string) => {
@@ -139,7 +149,8 @@ export async function readWinnersDirectory(opts: SourceOptions & { allMonths?: b
     }
   };
   const latest = await getPage(NLB_WINNERS, opts);
-  add(latest, "latest");
+  const pageOne = directoryMonth(opts.now ?? new Date());
+  add(latest, pageOne);
   if (opts.allMonths) {
     for (const month of parseNlbWinnersMonths(latest)) {
       try {
@@ -147,6 +158,10 @@ export async function readWinnersDirectory(opts: SourceOptions & { allMonths?: b
       } catch (err) {
         opts.log?.(`  winners ${month}: ${err instanceof Error ? err.message : String(err)}`);
       }
+    }
+    // A card found on a month page is labelled by its month pages only (the month of this run adds nothing then).
+    for (const m of Object.values(out)) {
+      for (const entry of m.values()) if (entry.listedIn.length > 1) entry.listedIn = entry.listedIn.filter((l) => l !== pageOne);
     }
   }
   return out;
@@ -199,8 +214,15 @@ export async function updateDirectory(
     const target = (directory[id] ??= new Map());
     for (const [drawNo, entry] of m) {
       const merged = target.get(drawNo) ?? { listedIn: [], date: stored[id]?.get(drawNo)?.date ?? null };
-      for (const l of entry.listedIn) if (!merged.listedIn.includes(l)) merged.listedIn.push(l);
-      // "latest" only matters until the card shows up on a month page
+      for (const l of entry.listedIn) {
+        if (merged.listedIn.includes(l)) continue;
+        // The earliest month counts (knownFrom): in a daily merge, a later one (the month of a run that sees a stored
+        // card still on page 1) says nothing new about when it was public, so the stored listing stays as it is.
+        const earliest = merged.listedIn.filter((x) => /^\d{4}-\d{2}$/.test(x)).sort()[0];
+        if (!replace && earliest !== undefined && l > earliest) continue;
+        merged.listedIn.push(l);
+      }
+      // "latest" (stored by older runs) only matters until the card shows up with a month
       if (merged.listedIn.length > 1) merged.listedIn = merged.listedIn.filter((l) => l !== "latest").sort().reverse();
       target.set(drawNo, merged);
     }

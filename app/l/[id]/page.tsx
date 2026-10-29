@@ -2,7 +2,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { LOTTERY_IDS, getDraws, getLottery, getPrediction, getStats, getStatus } from '@/lib/data'
+import { LOTTERY_IDS, getDraws, getJackpotStatus, getLottery, getPrediction, getStats, getStatus } from '@/lib/data'
 import type { Prediction, Stats, StatsWindow } from '@/lib/types'
 import { fmtDate, fmtDateTime, fmtInt } from '@/components/util/format'
 import { metaFor } from '@/components/util/lotteryMeta'
@@ -15,6 +15,10 @@ import { HistoryTable } from '@/components/HistoryTable'
 import { HISTORY_PAGE as PAGE } from '@/components/util/constants'
 import { Backtest } from '@/components/charts/Backtest'
 import { NumberScoreHeatmap } from '@/components/charts/Heatmaps'
+import { PickCards } from '@/components/Picks'
+import { HowPicksAreMade } from '@/components/HowPicksAreMade'
+import { JackpotWins } from '@/components/JackpotWins'
+import { LatestDrawJackpot } from '@/components/JackpotBadge'
 
 type Params = { id: string }
 
@@ -31,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const last = lottery.lastDraw ? ` Latest draw #${lottery.lastDraw.drawNo} on ${fmtDate(lottery.lastDraw.date)}.` : ''
   return {
     title: lottery.name,
-    description: `${lottery.name} (${lottery.board}) results, number statistics and statistical picks for the next draw.${last} For entertainment only.`,
+    description: `${lottery.name} (${lottery.board}) results with its known jackpot wins listed, number statistics and picks for the next draw.${last} For entertainment only; draws are random and every ticket has the same chance.`,
   }
 }
 
@@ -53,6 +57,7 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
   const hasDraws = lottery.drawCount > 0 && lottery.lastDraw !== null
   const prediction = hasDraws ? safePrediction(id) : null
   const draws = hasDraws ? getDraws(id) : []
+  const jackpots = getJackpotStatus(id)
   const windows: StatsWindow[] = ['all', '500', '100']
   const stats = Object.fromEntries(windows.map((w) => [w, getStats(id, w)])) as Record<StatsWindow, Stats>
   const status = getStatus()
@@ -83,22 +88,19 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
         </div>
         {prediction ? (
           <div>
-            <p className="row-label small muted" style={{ margin: '0 0 6px' }}>
-              Draw #{prediction.nextDrawNo} · {fmtDate(prediction.nextDrawDate)}
-            </p>
-            <Countdown dateIso={prediction.nextDrawDate} />
+            <Countdown dateIso={prediction.nextDrawDate} heading={`Draw #${prediction.nextDrawNo} · ${fmtDate(prediction.nextDrawDate)}`} />
           </div>
         ) : null}
       </header>
 
       <StaleNotice newestDrawDate={lottery.lastDraw?.date ?? null} lastRun={status.lastRun} thresholdDays={9} />
 
-      {/* Latest draw + picks */}
+      {/* Picks + latest draw + honest backtest */}
       <div className="detail-top">
         <section className="card" aria-labelledby="picks-title">
           <div className="card-head">
             <div>
-              <p className="eyebrow">Statistical picks</p>
+              <p className="eyebrow">Picks for fun</p>
               <h2 id="picks-title">Next draw picks</h2>
             </div>
             {prediction ? (
@@ -108,30 +110,13 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
             ) : null}
           </div>
           {prediction ? (
-            <div className="pred-sets">
-              {prediction.sets.map((s, i) => (
-                <div key={s.label} className={`pred-set${i === 0 ? ' lead' : ''}`}>
-                  <p className="label">
-                    {i === 0 ? '★ ' : ''}
-                    {s.label}
-                  </p>
-                  <BallRow letter={s.letter} numbers={s.numbers} bonus={s.bonus} bonusLabel={lottery.bonusLabel} reveal caption={s.label} />
-                  <div className="score">
-                    <span>Score</span>
-                    <span className="score-bar" aria-hidden="true">
-                      <span style={{ width: `${s.score * 100}%`, animationDelay: `${i * 120}ms` }} />
-                    </span>
-                    <b>{(s.score * 100).toFixed(0)}</b>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <>
+              {prediction.explanation?.summary ? <p className="picks-summary">{prediction.explanation.summary}</p> : null}
+              <PickCards prediction={prediction} lottery={lottery} />
+            </>
           ) : (
             <p className="muted small">No picks yet - they appear once draws have been recorded.</p>
           )}
-          <div style={{ marginTop: 14 }}>
-            <Disclaimer compact text={prediction?.disclaimer} />
-          </div>
         </section>
 
         <div className="stack" style={{ gap: 18 }}>
@@ -147,13 +132,18 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
               ) : null}
             </div>
             {lottery.lastDraw ? (
-              <BallRow
-                letter={lottery.lastDraw.letter}
-                numbers={lottery.lastDraw.numbers}
-                bonus={lottery.lastDraw.bonus}
-                bonusLabel={lottery.bonusLabel}
-                caption="Latest draw"
-              />
+              <>
+                <BallRow
+                  letter={lottery.lastDraw.letter}
+                  numbers={lottery.lastDraw.numbers}
+                  bonus={lottery.lastDraw.bonus}
+                  bonusLabel={lottery.bonusLabel}
+                  caption="Latest draw"
+                />
+                <div className="latest-jp">
+                  <LatestDrawJackpot draw={lottery.lastDraw} latest={jackpots.latestDraw} id="latest-jp" />
+                </div>
+              </>
             ) : (
               <p className="muted small">No draws recorded yet.</p>
             )}
@@ -161,29 +151,59 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
 
           <section className="card" aria-labelledby="bt-title">
             <div className="card-head">
-              <h2 id="bt-title" style={{ fontSize: '1.2rem' }}>
-                Does it beat random?
-              </h2>
+              <div>
+                <p className="eyebrow">Honest check</p>
+                <h2 id="bt-title" style={{ fontSize: '1.2rem' }}>
+                  How the picks did on past draws
+                </h2>
+              </div>
             </div>
-            {prediction ? <Backtest backtest={prediction.backtest} mainCount={mainCount} /> : <p className="muted small">Backtest unavailable.</p>}
+            {prediction?.backtestDetail ? (
+              <Backtest
+                detail={prediction.backtestDetail}
+                previous={prediction.previousModel ?? null}
+                liveCount={prediction.liveBalls?.count ?? null}
+                mainCount={mainCount}
+                mainMin={mainMin}
+                board={lottery.board}
+                checked={jackpots.checked}
+              />
+            ) : (
+              <p className="muted small">Backtest unavailable.</p>
+            )}
           </section>
         </div>
       </div>
 
-      {/* Score heatmap */}
+      {/* Method: the weights, their order and the maths */}
+      {prediction ? <HowPicksAreMade prediction={prediction} lottery={lottery} /> : null}
+
+      {/* Jackpot wins: the evidence the picks weigh first */}
+      <JackpotWins status={jackpots} lottery={lottery} />
+
+      {/* Pattern score per number */}
       <section className="card" aria-labelledby="heat-title">
         <div className="card-head">
           <div>
             <p className="eyebrow">Model view</p>
             <h2 id="heat-title">Number scores</h2>
           </div>
-          <p className="card-sub">Blend of long-run frequency, recent frequency and overdue-ness.</p>
+          <p className="card-sub">Pattern score, not a probability: how far the picks lean toward each number, scaled 0 to 100.</p>
         </div>
-        {prediction ? <NumberScoreHeatmap scores={prediction.numberScores} mainMin={mainMin} /> : <p className="muted small">Scores unavailable.</p>}
+        {prediction ? (
+          <NumberScoreHeatmap
+            scores={prediction.numberScores}
+            mainMin={mainMin}
+            excluded={prediction.liveBalls?.excluded ?? []}
+            since={prediction.liveBalls?.since ?? null}
+          />
+        ) : (
+          <p className="muted small">Scores unavailable.</p>
+        )}
       </section>
 
       {/* Statistics with window switcher (all three windows precomputed) */}
-      <StatsPanel lottery={{ mainCount, mainMin, mainMax, letterKind: lottery.letterKind }} stats={stats} />
+      <StatsPanel lottery={{ mainCount, mainMin, mainMax, letterKind: lottery.letterKind }} stats={stats} excluded={prediction?.liveBalls?.excluded ?? []} />
 
       {/* History */}
       <section className="card" aria-labelledby="hist-title">
@@ -192,7 +212,10 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
             <p className="eyebrow">Archive</p>
             <h2 id="hist-title">Draw history</h2>
           </div>
-          <p className="card-sub">{fmtInt(draws.length)} draws</p>
+          <p className="card-sub">
+            {fmtInt(draws.length)} draws
+            {draws.some((d) => d.jackpot) ? ` · ${draws.filter((d) => d.jackpot).length} jackpot-winning days marked` : ''}
+          </p>
         </div>
         <HistoryTable id={id} initial={draws.slice(0, PAGE)} total={draws.length} bonusLabel={lottery.bonusLabel} />
       </section>

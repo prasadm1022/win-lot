@@ -106,9 +106,19 @@ export function parseNlbWinnersDirectory(html: string): WinnerListing[] {
   return out;
 }
 
+/**
+ * The directory label of a card read from the winners page 1 (https://www.nlb.lk/winners) on `now`: the current month
+ * in Asia/Colombo (UTC+05:30, no daylight saving), "YYYY-MM". A card seen there is public at the latest in that month,
+ * so knownFrom (lib/model-v2/evidence.ts) treats it as known from that month's end, like a card on a month page, and
+ * never from its draw date: a card posted months after its draw must not reach earlier walk-forward steps.
+ */
+export function directoryMonth(now: Date): string {
+  return new Date(now.getTime() + 330 * 60_000).toISOString().slice(0, 7);
+}
+
 /** NLB winners directory, per lottery: drawNo -> where it is listed and the draw date when known. */
 export interface DirectoryEntry {
-  listedIn: string[]; // "YYYY-MM" month pages (or "latest")
+  listedIn: string[]; // "YYYY-MM" month pages (page 1 is labelled with the month it was read in; older data: "latest")
   date: string | null; // from data/draws, or the "Draw No.: N Date: ..." line of the old per-draw page
 }
 export type Directory = Record<string, Map<number, DirectoryEntry>>;
@@ -277,7 +287,7 @@ export interface DocLottery {
 }
 
 /** Single-draw dips in the published NLB amounts (typos such as "8,896,221" for ~89 M), oldest first. */
-function suspiciousAmounts(rows: PrizeRow[]): PrizeRow[] {
+export function suspiciousAmounts(rows: PrizeRow[]): PrizeRow[] {
   const asc = rows.filter((r) => r.superPrizeAmount !== null).sort((a, b) => a.drawNo - b.drawNo);
   return asc.filter((r, i) => {
     const prev = asc[i - 1]?.superPrizeAmount;

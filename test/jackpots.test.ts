@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
-import { readFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { pageCacheFile, readWinnersDirectory, updateDirectory } from "../lib/jackpot-sources";
 import {
   buildJackpots,
+  directoryMonth,
   inferJackpotResets,
   isSuperPrizeListing,
   jackpotTier,
@@ -14,8 +17,11 @@ import {
   parseNlbWinnersMonths,
   parseRupees,
   renderJackpotDoc,
+  type Directory,
+  type Jackpot,
   type PrizeRow,
 } from "../lib/jackpots";
+import { knownFrom } from "../lib/model-v2";
 
 const fixture = (name: string) => readFileSync(join(__dirname, "fixtures", name), "utf8");
 
@@ -71,6 +77,120 @@ describe("NLB winners directory", () => {
     expect(isSuperPrizeListing(card("Power Super Prize"))).toBe(false); // fixed 10 M tier, not the jackpot
     expect(isSuperPrizeListing(card("Mega Super Prize"))).toBe(true);
     expect(JSON.stringify(cards)).not.toContain("REDACTED");
+  });
+  it("labels the cards of page 1 with the month of the run in Sri Lanka (UTC+05:30), never 'latest'", () => {
+    expect(directoryMonth(new Date("2026-10-31T18:29:59Z"))).toBe("2026-10"); // 23:59:59 on 31 Oct in Colombo
+    expect(directoryMonth(new Date("2026-10-31T18:30:00Z"))).toBe("2026-11"); // midnight in Colombo
+    expect(directoryMonth(new Date("2026-12-31T20:00:00Z"))).toBe("2027-01");
+    expect(directoryMonth(new Date("2026-03-01T00:00:00Z"))).toBe("2026-03");
+  });
+});
+
+// lib/jackpot-sources.ts, the side that reads the pages and merges them into data/jackpots.json. A card's listing month
+// decides when the model may use it (knownFrom), so these labels guard against leakage (docs/MODEL-V2.md 6, test 5).
+describe("winners directory: page-1 labels and the daily merge (fixture pages in the page cache, never the network)", () => {
+  const WINNERS = "https://www.nlb.lk/winners";
+  /** Super Prize cards without names or towns, in the markup parseNlbWinnersDirectory reads. */
+  const page = (cards: string[]) =>
+    `<div class="winners"><h2>Super Prize Winners</h2>${cards.map((c) => `<div class="win"><s></s><div>${c}<br>Super Prize <br></div></div>`).join("")}</div>`;
+  const cards = (d: Directory) => Object.entries(d).flatMap(([id, m]) => [...m].map(([drawNo, entry]) => ({ card: `${id} ${drawNo}`, ...entry })));
+  let root: string;
+  let dataDir: string;
+  let cacheDir: string;
+  let requested: string[];
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), "win-lot-directory-"));
+    dataDir = join(root, "data");
+    cacheDir = join(root, "cache");
+    mkdirSync(dataDir);
+    mkdirSync(cacheDir);
+    writeFileSync(pageCacheFile(cacheDir, WINNERS), fixture("nlb-winners.html"));
+    // Every page is read from the cache; a page missing there would reach this stub and fail the test.
+    requested = [];
+    vi.stubGlobal("fetch", async (url: unknown) => {
+      requested.push(String(url));
+      throw new Error(`no network in tests: ${String(url)}`);
+    });
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it("labels every card of page 1 with the month of the run in Colombo (directoryMonth), never 'latest'", async () => {
+    for (const [now, month] of [
+      ["2026-10-31T18:29:59Z", "2026-10"], // 23:59:59 on 31 Oct in Colombo
+      ["2026-10-31T18:30:00Z", "2026-11"], // midnight in Colombo
+    ] as const) {
+      const d = await readWinnersDirectory({ dataDir, cacheDir, now: new Date(now) });
+      expect(cards(d).map((c) => c.card).sort()).toEqual([
+        "dhana-nidhanaya 2045",
+        "dhana-nidhanaya 2047",
+        "dhana-nidhanaya 2319",
+        "govisetha 4276",
+        "mega-power 2434",
+        "mega-power 2438",
+        "mega-power 2440",
+      ]);
+      for (const c of cards(d)) expect(c, c.card).toMatchObject({ listedIn: [month], date: null });
+    }
+    expect(requested).toEqual([]);
+  });
+
+  it("in a full rebuild, a card also on a month page keeps only its month pages; a card on page 1 alone keeps the run month", async () => {
+    const months = parseNlbWinnersMonths(fixture("nlb-winners.html"));
+    expect(months).toContain("2026/08");
+    for (const m of months) writeFileSync(pageCacheFile(cacheDir, `${WINNERS}/${m}`), page(m === "2026/08" ? ["Dhana Nidhanaya 2319"] : []));
+    const d = await readWinnersDirectory({ dataDir, cacheDir, allMonths: true, now: new Date("2026-10-29T12:00:00Z") });
+    expect(d["dhana-nidhanaya"].get(2319)).toEqual({ listedIn: ["2026-08"], date: null });
+    expect(d["mega-power"].get(2440)).toEqual({ listedIn: ["2026-10"], date: null });
+    expect(requested).toEqual([]);
+  });
+
+  it("a daily merge keeps the earliest month; a card stored as 'latest' by older runs takes the month of the run", async () => {
+    const stored = (lotteryId: string, drawNo: number, date: string, listedIn: string[]): Jackpot => ({
+      lotteryId,
+      drawNo,
+      date,
+      letter: null,
+      numbers: null,
+      bonus: null,
+      jackpotWinners: null,
+      superPrizeAmount: null,
+      source: "nlb-winners-directory",
+      inDrawHistory: false,
+      listedIn,
+    });
+    const before = [stored("dhana-nidhanaya", 2045, "2025-11-16", ["2025-11"]), stored("mega-power", 2440, "2026-02-01", ["latest"])];
+    writeFileSync(join(dataDir, "jackpots.json"), JSON.stringify(before));
+    // A new card older than the archive: its date is read from its emptied per-draw page (the fixture of draw 2300).
+    writeFileSync(pageCacheFile(cacheDir, "https://www.nlb.lk/results/dhana-nidhanaya/2300"), fixture("nlb-prize-empty.html"));
+    // What readWinnersDirectory gives the cards of page 1 on a run in late October: 2045 and 2440 again, 2300 for the first time.
+    const run = directoryMonth(new Date("2026-10-29T12:00:00Z"));
+    const fresh: Directory = {
+      "dhana-nidhanaya": new Map([
+        [2045, { listedIn: [run], date: null }],
+        [2300, { listedIn: [run], date: null }],
+      ]),
+      "mega-power": new Map([[2440, { listedIn: [run], date: null }]]),
+    };
+    const d = await updateDirectory({ dataDir, cacheDir }, fresh);
+    // Still on page 1 eleven months later: that says nothing new about when it was public, so the listing stays.
+    expect(d["dhana-nidhanaya"].get(2045)).toEqual({ listedIn: ["2025-11"], date: "2025-11-16" });
+    // "latest" (older data) only mattered until the card showed up with a month.
+    expect(d["mega-power"].get(2440)).toEqual({ listedIn: ["2026-10"], date: "2026-02-01" });
+    expect(d["dhana-nidhanaya"].get(2300)).toEqual({ listedIn: ["2026-10"], date: "2025-09-14" });
+    // What the model then sees (knownFrom): the earliest listing month's end, never the day after the draw.
+    const known = (id: string, drawNo: number) => {
+      const e = d[id].get(drawNo)!;
+      return knownFrom({ drawNo, date: e.date, source: "nlb-winners-directory", listedIn: e.listedIn }, []);
+    };
+    expect(known("dhana-nidhanaya", 2045)).toBe("2025-11-30");
+    expect(knownFrom(before[1], [])).toBe("2026-02-02"); // as stored: "latest" counted from the day after the draw
+    expect(known("mega-power", 2440)).toBe("2026-10-31");
+    expect(known("dhana-nidhanaya", 2300)).toBe("2026-10-31");
+    expect(requested).toEqual([]);
   });
 });
 

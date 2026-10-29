@@ -2,7 +2,7 @@
 // Pure presentational balls; no hooks, so usable from server and client components.
 import type { CSSProperties } from 'react'
 import { ZODIAC_GLYPH } from './util/lotteryMeta'
-import { bonusText } from './util/format'
+import { bonusLabelOf, bonusText } from './util/format'
 
 type Size = 'sm' | 'md' | 'lg' | 'xl'
 type Kind = 'number' | 'letter' | 'bonus'
@@ -25,6 +25,8 @@ export function Ball({ value, kind = 'number', size = 'md', index = 0, label }: 
     sizeClass[size],
     kind === 'letter' ? 'ball-letter' : '',
     kind === 'bonus' ? 'ball-bonus' : '',
+    // A multi-digit bonus (Dhana Nidhanaya Sunday Bonus "0603") is a pill, not a 2-character ball.
+    kind === 'bonus' && text.length > 2 ? 'wide' : '',
     glyph ? 'ball-zodiac' : '',
   ]
     .filter(Boolean)
@@ -57,11 +59,13 @@ interface BallRowProps {
 
 export function BallRow({ letter, numbers, bonus, bonusLabel, size = 'md', reveal = false, caption }: BallRowProps) {
   const b = bonusText(bonus)
+  // A structured bonus carries its own label ("Sunday Bonus"); it is spoken once, here, never inside the ball text.
+  const bLabel = bonusLabelOf(bonus) ?? bonusLabel
   let i = 0
   const parts: string[] = []
   if (letter) parts.push(`letter ${letter}`)
   parts.push(`numbers ${numbers.join(', ')}`)
-  if (b) parts.push(`${bonusLabel ?? 'bonus'} ${b}`)
+  if (b) parts.push(`${bLabel ?? 'bonus'} ${b}`)
   return (
     <span className={`ball-row${reveal ? ' reveal' : ''}`} role="group" aria-label={caption ? `${caption}: ${parts.join('; ')}` : parts.join('; ')}>
       {letter ? <Ball value={letter} kind="letter" size={size} index={i++} /> : null}
@@ -73,7 +77,7 @@ export function BallRow({ letter, numbers, bonus, bonusLabel, size = 'md', revea
           <span className="ball-plus" aria-hidden="true">
             +
           </span>
-          <Ball value={b} kind="bonus" size={size} index={i++} label={`${bonusLabel ?? 'Bonus'} ${b}`} />
+          <Ball value={b} kind="bonus" size={size} index={i++} label={`${bLabel ?? 'Bonus'} ${b}`} />
         </>
       ) : null}
     </span>

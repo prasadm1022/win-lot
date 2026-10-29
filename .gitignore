@@ -8,3 +8,4 @@ public/data/
 next-env.d.ts
 *.tsbuildinfo
 data/**/*.tmp
+.cache/

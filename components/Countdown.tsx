@@ -6,6 +6,10 @@ import { drawInstant, fmtDate } from './util/format'
 interface Props {
   dateIso: string
   variant?: 'tiles' | 'inline'
+  /** Line shown above the tiles, e.g. "Next draw · 28 Oct 2026 at 8 pm". */
+  heading?: string
+  /** Replaces `heading` once the draw time has passed (defaults to `heading`). */
+  pastHeading?: string
 }
 
 interface Remaining {
@@ -33,9 +37,10 @@ const two = (n: number) => String(n).padStart(2, '0')
 
 /**
  * Counts down to 20:00 Colombo time on the draw date. The static HTML carries a neutral
- * placeholder; the real value appears after hydration and ticks once a second.
+ * placeholder; the real value appears after hydration and ticks once a second. Once the draw
+ * time has passed, the tiles give way to a visible sentence (the same one screen readers get).
  */
-export function Countdown({ dateIso, variant = 'tiles' }: Props) {
+export function Countdown({ dateIso, variant = 'tiles', heading, pastHeading }: Props) {
   const [r, setR] = useState<Remaining | null>(null)
 
   useEffect(() => {
@@ -65,12 +70,22 @@ export function Countdown({ dateIso, variant = 'tiles' }: Props) {
       <span>{name}</span>
     </span>
   )
+  const past = r?.past ?? false
   return (
-    <div className="countdown" role="timer" aria-label={text}>
-      {r && r.d > 0 ? unit(String(r.d), 'days') : null}
-      {unit(r ? two(r.h) : '--', 'hrs')}
-      {unit(r ? two(r.m) : '--', 'min')}
-      {unit(r ? two(r.s) : '--', 'sec')}
+    <div className="countdown-block">
+      {heading ? <p className="row-label small muted countdown-heading">{past ? (pastHeading ?? heading) : heading}</p> : null}
+      {past ? (
+        <p className="countdown-past small" role="status">
+          {text}
+        </p>
+      ) : (
+        <div className="countdown" role="timer" aria-label={text}>
+          {r && r.d > 0 ? unit(String(r.d), 'days') : null}
+          {unit(r ? two(r.h) : '--', 'hrs')}
+          {unit(r ? two(r.m) : '--', 'min')}
+          {unit(r ? two(r.s) : '--', 'sec')}
+        </div>
+      )}
     </div>
   )
 }

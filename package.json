@@ -17,6 +17,9 @@
     "update": "tsx scripts/update.ts",
     "update:backfill-dlb": "tsx scripts/update.ts --backfill-dlb",
     "jackpots": "tsx scripts/jackpots.ts",
+    "audit:model": "tsx scripts/model-v2-audit.ts",
+    "bench:model": "tsx scripts/bench-model.ts",
+    "golden:model": "tsx scripts/model-v2-golden.ts",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {

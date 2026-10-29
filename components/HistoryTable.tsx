@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { DrawSummary } from '@/lib/types'
 import { fmtDate, fmtInt } from './util/format'
 import { BallRow } from './Ball'
+import { JackpotBadge } from './JackpotBadge'
 import { EmptyState, ErrorNotice } from './Notices'
 
 import { HISTORY_PAGE as PAGE } from './util/constants'
@@ -61,6 +62,7 @@ export function HistoryTable({ id, initial, total, bonusLabel }: Props) {
           <ErrorNotice message={`Older draws could not be fetched (${all.message}).`} onRetry={() => void load()} />
         ) : (
           <table className="history">
+            <caption className="sr-only">Draw history, newest first. Draws with a known jackpot win carry a &quot;Jackpot won&quot; badge.</caption>
             <thead>
               <tr>
                 <th scope="col">Draw</th>
@@ -71,8 +73,15 @@ export function HistoryTable({ id, initial, total, bonusLabel }: Props) {
             </thead>
             <tbody>
               {(rows ?? initial).map((d) => (
-                <tr key={d.drawNo} style={loading ? { opacity: 0.45 } : undefined}>
-                  <td className="num">#{d.drawNo}</td>
+                <tr key={d.drawNo} className={d.jackpot ? 'jp-row' : undefined} style={loading ? { opacity: 0.45 } : undefined}>
+                  <td className="num">
+                    #{d.drawNo}
+                    {d.jackpot ? (
+                      <div className="jp-cell">
+                        <JackpotBadge jackpot={d.jackpot} id={`jp-${id}-${d.drawNo}`} size="sm" />
+                      </div>
+                    ) : null}
+                  </td>
                   <td>{fmtDate(d.date)}</td>
                   <td>
                     <BallRow letter={d.letter} numbers={d.numbers} bonus={d.bonus} bonusLabel={bonusLabel} size="sm" />

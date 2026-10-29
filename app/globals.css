@@ -49,6 +49,9 @@
   --viz-seq-3: #b08422;
   --viz-seq-4: #e2b23c;
   --viz-seq-5: #ffe08a;
+  /* Ink on the sequential ramp, per step (Heatmaps.tsx): the mid-gold and bright steps need dark ink on dark */
+  --seq-ink-3: var(--ink-inverse);
+  --seq-ink-hi: var(--ink-inverse);
 
   /* Ball */
   --ball-face: radial-gradient(circle at 32% 28%, #fffbe8 0%, #f6e3a2 28%, #d9a93a 62%, #7a5410 100%);
@@ -115,8 +118,10 @@
   --viz-seq-1: #f1dfae;
   --viz-seq-2: #e3c06a;
   --viz-seq-3: #c9961f;
-  --viz-seq-4: #9a6f0a;
+  --viz-seq-4: #7d5a08;
   --viz-seq-5: #5c3f02;
+  --seq-ink-3: var(--ink);
+  --seq-ink-hi: var(--ink-inverse);
 
   --ball-shadow: 0 6px 14px rgba(60, 40, 10, 0.25), inset 0 -3px 6px rgba(0, 0, 0, 0.18);
   --shadow: 0 10px 30px rgba(60, 40, 10, 0.12);
@@ -212,7 +217,7 @@ button {
   z-index: 100;
   padding: 10px 14px;
   background: var(--gold);
-  color: var(--ink-inverse);
+  color: var(--on-gold);
   border-radius: var(--radius-sm);
   font-weight: 600;
 }
@@ -511,6 +516,15 @@ main {
   color: #fff;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 }
+.ball-bonus.wide {
+  /* a multi-digit bonus ("0603") is a pill as wide as its text, never a circle it overflows */
+  width: auto;
+  min-width: var(--size);
+  padding: 0 calc(var(--size) * 0.28);
+  border-radius: 999px;
+  font-size: calc(var(--size) * 0.38);
+  letter-spacing: 0.04em;
+}
 .ball-zodiac {
   font-size: calc(var(--size) * 0.5);
   font-family: var(--font-body);
@@ -615,7 +629,7 @@ main {
 }
 .notice-disclaimer .notice-icon {
   background: var(--gold);
-  color: var(--ink-inverse);
+  color: var(--on-gold);
 }
 .notice-error {
   border-color: color-mix(in srgb, var(--bad) 50%, transparent);
@@ -758,27 +772,71 @@ main {
   font-size: 1.1rem;
   margin: 0 0 8px;
 }
+.hero-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
 .hero-dots {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   justify-content: center;
-  margin-top: 10px;
 }
 .hero-dots button {
-  width: 10px;
-  height: 10px;
+  /* 24 x 24 px target (WCAG 2.5.8) around a 12 px dot */
+  width: 24px;
+  height: 24px;
   padding: 0;
+  border: 0;
   border-radius: 50%;
-  border: 1px solid var(--border-strong);
   background: transparent;
+  display: grid;
+  place-items: center;
   cursor: pointer;
 }
-.hero-dots button[aria-current='true'] {
+.hero-dots button::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  box-sizing: border-box;
+}
+.hero-dots button[aria-pressed='true']::before {
   background: var(--gold);
   border-color: var(--gold);
 }
+.hero-ctl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.hero-ctl:hover {
+  color: var(--ink);
+  background: var(--surface-2);
+}
 
 /* ---------- Countdown ---------- */
+.countdown-heading {
+  margin: 0 0 6px;
+}
+.countdown-past {
+  margin: 0;
+  color: var(--ink-2);
+  max-width: 36ch;
+}
 .countdown {
   display: inline-flex;
   gap: 8px;
@@ -880,6 +938,12 @@ main {
   inset: 0;
   border-radius: inherit;
 }
+.lottery-card .lc-latest-jp .jp,
+.lottery-card .lc-latest-jp .jp-roll {
+  /* interactive children must sit above the stretched link's overlay */
+  position: relative;
+  z-index: 1;
+}
 
 /* ---------- Detail page ---------- */
 .page-head {
@@ -922,55 +986,505 @@ main {
   font-variant-numeric: tabular-nums;
 }
 
-.pred-sets {
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* ---------- Picks (model v2, spec 7.3): no score, no rating ---------- */
+.picks {
   display: grid;
   gap: 12px;
 }
-.pred-set {
+.picks-summary {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+.pick-cards {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px 16px;
-  align-items: center;
+  gap: 12px;
+}
+.pick-card {
+  display: grid;
+  gap: 10px;
   padding: 14px 16px;
   border-radius: var(--radius);
   background: var(--surface-2);
   border: 1px solid var(--border);
 }
-.pred-set.lead {
+.pick-card.lead {
   border-color: color-mix(in srgb, var(--gold) 55%, transparent);
   background: color-mix(in srgb, var(--gold) 9%, var(--surface-2));
 }
-.pred-set .label {
-  font-weight: 600;
+.pick-card.lead .pick-why,
+.pick-card.lead .pick-note,
+.pick-card.lead .parts-values {
+  color: var(--ink-2);
+}
+.picks-legend {
   margin: 0;
 }
-.pred-set .score {
-  grid-column: 1 / -1;
+.pick-head {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 10px;
-  align-items: center;
-  font-size: 0.8rem;
+  gap: 2px;
+}
+.pick-title {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+}
+.pick-star {
+  color: var(--gold-ink);
+  margin-right: 6px;
+}
+.pick-why {
+  margin: 0;
+  font-size: 0.82rem;
   color: var(--ink-3);
 }
-.score-bar {
-  height: 6px;
-  border-radius: 3px;
+.pick-note {
+  margin: 0;
+  color: var(--ink-3);
+}
+.odds-line {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+}
+
+/* Three-segment parts bar: jackpot combinations / jackpot dates / daily draws (values always as text too) */
+.parts {
+  display: grid;
+  gap: 6px;
+}
+.parts-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
   background: var(--surface-3);
   overflow: hidden;
 }
-.score-bar > span {
+.parts-bar .seg {
   display: block;
   height: 100%;
-  border-radius: 3px;
-  background: linear-gradient(90deg, var(--gold-3), var(--gold-2));
+  flex: none;
   transform-origin: left;
-  animation: grow 0.8s var(--ease) both;
+  animation: grow 0.6s var(--ease) both;
 }
-@keyframes grow {
-  from {
-    transform: scaleX(0);
-  }
+.seg-jackpotCombinations,
+.sw-jackpotCombinations {
+  background: var(--gold);
+}
+.seg-jackpotDates,
+.sw-jackpotDates {
+  background: var(--amethyst);
+}
+.seg-dailyDraws,
+.sw-dailyDraws {
+  background: var(--sapphire);
+}
+.parts-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+.parts-values > div {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+}
+.parts-values dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.parts-values dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+.sw {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  display: inline-block;
+  flex: none;
+}
+
+/* ---------- Jackpot-day marking (spec 7.1) ---------- */
+.jp {
+  display: inline-block;
+  max-width: 100%;
+}
+.jp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+  background: color-mix(in srgb, var(--gold) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  cursor: pointer;
+  white-space: nowrap;
+  list-style: none;
+  user-select: none;
+}
+.jp-badge::-webkit-details-marker {
+  display: none;
+}
+.jp-badge:hover,
+.jp[open] > .jp-badge {
+  background: color-mix(in srgb, var(--gold) 22%, transparent);
+}
+.jp-badge:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+  border-radius: 999px;
+}
+.jp.jp-sm .jp-badge {
+  padding: 3px 9px;
+  min-height: 24px;
+  font-size: 0.72rem;
+}
+.jp-tip {
+  display: block;
+  margin-top: 6px;
+  max-width: 320px;
+  white-space: normal;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--ink-2);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  text-align: left;
+}
+.jp.jp-sm .jp-tip {
+  font-size: 0.76rem;
+}
+.jp-roll {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--ink-2);
+}
+.jp-roll.jp-sm {
+  font-size: 0.74rem;
+}
+table.history tr.jp-row td {
+  background: color-mix(in srgb, var(--gold) 6%, transparent);
+}
+table.history tr.jp-row td:first-child {
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+.jp-cell {
+  margin-top: 4px;
+}
+.latest-jp,
+.lc-latest-jp {
+  margin-top: 10px;
+}
+.latest-jp:empty,
+.lc-latest-jp:empty {
+  display: none;
+}
+.lc-latest-jp {
+  margin-top: 8px;
+}
+.hero-latest {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  margin: 8px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 10px;
+  align-items: center;
+}
+.hero-latest .jp-tip {
+  text-align: center;
+}
+.lc-jackpot {
+  display: grid;
+  gap: 4px;
+  font-size: 0.82rem;
+  color: var(--ink-2);
+}
+.lc-jackpot .line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+.lc-jackpot .line svg {
+  color: var(--gold-ink);
+  flex: none;
+}
+
+/* ---------- Jackpot wins section (spec 7.2) ---------- */
+.jw-summary {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: var(--ink);
+}
+.jw-stats {
+  margin-bottom: 14px;
+}
+table.jw-table {
+  width: 100%;
+  min-width: 760px; /* keeps the columns readable; .table-wrap scrolls sideways on phones */
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+table.jw-table th,
+table.jw-table td {
+  text-align: left;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+table.jw-table th {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  font-weight: 600;
+  white-space: nowrap;
+}
+table.jw-table td.num {
+  font-variant-numeric: tabular-nums;
+}
+table.jw-table .nowrap {
+  white-space: nowrap;
+}
+table.jw-table .ball-row {
+  flex-wrap: nowrap;
+}
+.jw-numbers {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gold-ink);
+}
+.notes {
+  margin: 12px 0 0;
+  padding-left: 1.1em;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  display: grid;
+  gap: 4px;
+}
+
+/* ---------- How these picks are made (spec 7.3) ---------- */
+.how-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.how-headline {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin: 0 0 10px;
+}
+.src-list {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+  display: grid;
+  gap: 10px;
+}
+.src {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.src-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.src-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.src-pct {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--gold-ink);
+  font-size: 1.05rem;
+}
+.src-pct .muted {
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+.src-why {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+}
+.how-side {
+  font-size: 0.92rem;
+  color: var(--ink-2);
+}
+.how-side p {
+  margin: 0 0 10px;
+}
+.how-side strong {
+  color: var(--ink);
+}
+
+/* Collapsed details ("Show the maths", "Previous model (v1)") */
+details.maths {
+  margin-top: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+details.maths > summary {
+  cursor: pointer;
+  padding: 10px 14px;
+  font-weight: 600;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: var(--radius-sm);
+}
+details.maths > summary::-webkit-details-marker {
+  display: none;
+}
+details.maths > summary::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--gold-ink);
+  border-bottom: 2px solid var(--gold-ink);
+  transform: rotate(-45deg);
+  transition: transform 0.2s var(--ease);
+  margin: 0 2px 2px 4px;
+  flex: none;
+}
+details.maths[open] > summary::before {
+  transform: rotate(45deg);
+}
+details.maths > summary:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+.maths-body {
+  padding: 4px 14px 14px;
+  display: grid;
+  gap: 12px;
+}
+.maths-body h3 {
+  margin: 10px 0 0;
+  font-size: 1rem;
+}
+.maths-body p {
+  margin: 0;
+}
+.kv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.kv-table caption {
+  caption-side: top;
+  text-align: left;
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  padding: 0 0 6px;
+}
+.kv-table th,
+.kv-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.kv-table th {
+  font-weight: 600;
+  color: var(--ink-2);
+  font-size: 0.8rem;
+}
+.kv-table thead th {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+  color: var(--ink-3);
+}
+.kv-table .num {
+  font-variant-numeric: tabular-nums;
+}
+.kv {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 4px 14px 14px;
+  font-size: 0.85rem;
+}
+.kv dt {
+  color: var(--ink-3);
+}
+.kv dd {
+  margin: 0;
+  color: var(--ink-2);
+}
+.prev-sets {
+  display: grid;
+  gap: 8px;
+}
+.prev-set {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.prev-label {
+  font-size: 0.78rem;
+  color: var(--ink-3);
+  min-width: 42px;
+}
+
+/* Lean bars (diverging around 1.00) */
+.lean-chart .lean-base {
+  stroke: var(--ink-2);
+  stroke-width: 1.5;
+}
+.lean-chart .lean-bar.up {
+  fill: var(--viz-series-1);
+}
+.lean-chart .lean-bar.down {
+  fill: var(--viz-series-2);
+}
+.lean-caption {
+  margin: 8px 0 0;
 }
 
 .chips {
@@ -1036,10 +1550,25 @@ main {
   position: relative;
 }
 .heat-cell:hover,
-.heat-cell:focus-visible {
+.heat-cell.kb {
+  /* .kb: the cell reached with the arrow keys (the grid is one tab stop; the cells themselves take no focus) */
   outline: 2px solid var(--gold);
   outline-offset: 1px;
   z-index: 1;
+}
+.heat-grid-wrap {
+  position: relative;
+  border-radius: 6px;
+}
+.heat-grid-wrap:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+.heat-tip {
+  /* the keyboard tooltip of the Number scores grid may wrap (a ball not in use carries a longer text) */
+  white-space: normal;
+  max-width: 240px;
+  text-align: center;
 }
 .heat-scale {
   display: flex;
@@ -1128,6 +1657,20 @@ main {
   fill: transparent;
   cursor: crosshair;
 }
+.chart .hit.kb {
+  /* the bar reached with the arrow keys */
+  fill: color-mix(in srgb, var(--gold) 14%, transparent);
+  stroke: var(--gold);
+  stroke-width: 1.5;
+}
+.chart svg:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+  border-radius: 6px;
+}
+.chart-scroll {
+  width: 100%;
+}
 .chart .line {
   fill: none;
   stroke: var(--viz-series-1);
@@ -1208,37 +1751,79 @@ main {
   background: var(--gold-2);
 }
 
-/* Backtest */
+/* Backtest (spec 7.4): dot = mean hits per draw, bar = 95% range; v2 gold, random sapphire, v1 grey */
 .backtest {
   display: grid;
   gap: 14px;
 }
-.backtest .bars {
+.bt-block {
   display: grid;
   gap: 8px;
 }
-.backtest .bar-row {
+.bt-pooled {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--gold) 7%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+}
+.bt-headline {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.bt-rows {
   display: grid;
-  grid-template-columns: 120px 1fr 60px;
+  gap: 8px;
+}
+.bt-row {
+  display: grid;
+  grid-template-columns: 128px 1fr 118px;
   gap: 10px;
   align-items: center;
   font-size: 0.85rem;
 }
-.backtest .bar-row .track {
+.bt-track {
+  position: relative;
   height: 14px;
   border-radius: 7px;
   background: var(--surface-3);
-  overflow: hidden;
 }
-.backtest .bar-row .fill {
-  height: 100%;
-  border-radius: 7px;
+.bt-range {
+  position: absolute;
+  top: 3px;
+  height: 8px;
+  border-radius: 4px;
   background: var(--viz-series-1);
-  animation: grow 0.8s var(--ease) both;
-  transform-origin: left;
+  opacity: 0.45;
 }
-.backtest .bar-row.baseline .fill {
+.bt-dot {
+  position: absolute;
+  top: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: var(--viz-series-1);
+  border: 2px solid var(--surface);
+}
+.bt-random .bt-range,
+.bt-random .bt-dot {
   background: var(--viz-series-2);
+}
+.bt-v1 .bt-range,
+.bt-v1 .bt-dot {
+  background: var(--ink-3);
+}
+.bt-val {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.bt-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--ink-3);
+  padding: 0 128px 0 138px;
 }
 .backtest .verdict {
   font-size: 0.9rem;
@@ -1246,6 +1831,36 @@ main {
   border-radius: var(--radius-sm);
   background: var(--surface-2);
   border: 1px solid var(--border);
+}
+.backtest .notes {
+  margin: 0;
+}
+.backtest details.maths {
+  margin-top: 0;
+}
+
+/* Heatmap cells for balls not in use: dashed, hatched, struck through, and said in text */
+.heat-cell.dead {
+  background: repeating-linear-gradient(135deg, transparent 0 4px, var(--border-strong) 4px 5px);
+  border-style: dashed;
+  color: var(--ink-3);
+  text-decoration: line-through;
+}
+.heat-cell.mini {
+  display: inline-grid;
+  width: 16px;
+  height: 16px;
+  aspect-ratio: auto;
+  font-size: 0;
+  vertical-align: middle;
+  margin-right: 6px;
+  flex: none;
+}
+.heat-dead-note {
+  margin: 8px 0 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 /* History table */
@@ -1359,6 +1974,9 @@ table.history td.num {
   .detail-top {
     grid-template-columns: 1fr;
   }
+  .how-grid {
+    grid-template-columns: 1fr;
+  }
 }
 @media (max-width: 600px) {
   .site-nav a {
@@ -1380,11 +1998,30 @@ table.history td.num {
   .ball-lg {
     --size: 46px;
   }
-  .pred-set {
-    grid-template-columns: 1fr;
+  .bt-row {
+    grid-template-columns: 1fr auto;
+    gap: 4px 10px;
   }
-  .backtest .bar-row {
-    grid-template-columns: 90px 1fr 50px;
+  .bt-row .bt-track {
+    grid-column: 1 / -1;
+  }
+  .bt-axis {
+    padding: 0;
+  }
+  .kv {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  /* The four-column split tables fit a phone once the cell padding and header tracking come down a little */
+  .kv-table th,
+  .kv-table td {
+    padding: 6px 4px;
+  }
+  .kv-table thead th {
+    letter-spacing: 0.04em;
+  }
+  .kv dd {
+    margin-bottom: 6px;
   }
   .countdown .unit {
     min-width: 40px;
@@ -1395,6 +2032,18 @@ table.history td.num {
   .hero-drum .orbit .ball {
     --r: 82px;
     --size: 34px;
+  }
+  /* A 900-unit chart shrunk to a phone makes 4 px labels: keep the chart at its viewBox width (so its 11 px labels
+     render at 11 px) and let it scroll sideways */
+  .lean-chart,
+  .chart-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  .lean-chart svg,
+  .chart-scroll svg {
+    min-width: 900px;
   }
 }
 @media (max-width: 400px) {

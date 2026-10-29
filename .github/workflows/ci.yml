@@ -20,4 +20,12 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      # Runtime budgets of docs/MODEL-V2.md 8.1 item 11 (exits 1 over budget: all lotteries 20 s, synthetic 10 s).
+      - run: npm run bench:model
       - run: npm run build
+      # The copy rules on the built pages (docs/MODEL-V2.md 6): out/ exists only now, so `npm test` above skipped that
+      # check. REQUIRE_BUILT_PAGES makes a missing out/ a failure instead of a skip.
+      - name: Copy rules on the built pages
+        run: npx vitest run test/model-v2.copy.test.ts
+        env:
+          REQUIRE_BUILT_PAGES: "1"

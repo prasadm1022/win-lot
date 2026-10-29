@@ -1,12 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 import type { ReactNode } from 'react'
 
+/**
+ * The one disclaimer of the site, word for word the DISCLAIMER of lib/model.ts (the payload's `prediction.disclaimer`),
+ * so the picks panel, the page bottoms, the home page and the about page all show the same sentence. It is mirrored
+ * here instead of imported because this file is part of the client bundle (HistoryTable) and must not pull in model
+ * code; test/ui.test.ts checks the two strings are identical.
+ */
 export const DISCLAIMER_TEXT =
-  'Lottery draws are random. These picks are statistical patterns from past results, offered for entertainment only, and do not improve your odds. Please play responsibly.'
+  'Lottery draws are random and every combination is equally likely. These picks are a statistical curiosity for entertainment only; they do not improve your odds. Please play responsibly.'
 
-export function Disclaimer({ text, compact = false }: { text?: string; compact?: boolean }) {
+export function Disclaimer({ text, compact = false, id }: { text?: string; compact?: boolean; id?: string }) {
   return (
-    <div className={`notice notice-disclaimer${compact ? ' notice-compact' : ''}`} role="note">
+    <div className={`notice notice-disclaimer${compact ? ' notice-compact' : ''}`} role="note" id={id}>
       <span className="notice-icon" aria-hidden="true">
         !
       </span>

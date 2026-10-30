@@ -1,5 +1,61 @@
 [
   {
+    "id": 42,
+    "run_at": "2026-10-30T20:59:10Z",
+    "lottery_id": "kapruka",
+    "inserted": 0,
+    "status": "ok",
+    "message": "parsed 13, newest #2506"
+  },
+  {
+    "id": 41,
+    "run_at": "2026-10-30T20:59:10Z",
+    "lottery_id": "shanida",
+    "inserted": 0,
+    "status": "ok",
+    "message": "parsed 13, newest #5491"
+  },
+  {
+    "id": 40,
+    "run_at": "2026-10-30T20:59:10Z",
+    "lottery_id": "super-ball",
+    "inserted": 0,
+    "status": "ok",
+    "message": "parsed 13, newest #3330"
+  },
+  {
+    "id": 39,
+    "run_at": "2026-10-30T20:59:10Z",
+    "lottery_id": "ada-kotipathi",
+    "inserted": 0,
+    "status": "ok",
+    "message": "parsed 13, newest #3156"
+  },
+  {
+    "id": 38,
+    "run_at": "2026-10-30T20:59:10Z",
+    "lottery_id": "govisetha",
+    "inserted": 0,
+    "status": "ok",
+    "message": "parsed 208, newest #4598"
+  },
+  {
+    "id": 37,
+    "run_at": "2026-10-30T20:59:10Z",
+    "lottery_id": "mega-power",
+    "inserted": 0,
+    "status": "ok",
+    "message": "parsed 208, newest #2704"
+  },
+  {
+    "id": 36,
+    "run_at": "2026-10-30T20:59:10Z",
+    "lottery_id": "dhana-nidhanaya",
+    "inserted": 0,
+    "status": "ok",
+    "message": "parsed 208, newest #2386"
+  },
+  {
     "id": 35,
     "run_at": "2026-10-30T19:34:03Z",
     "lottery_id": "kapruka",

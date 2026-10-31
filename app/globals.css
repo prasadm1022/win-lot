@@ -2054,3 +2054,84 @@ table.history td.num {
     font-size: 0.72rem;
   }
 }
+
+/* ---------- Ads ---------- */
+/* Labelled ad spaces outside <main>, reserved at their final size so content never moves (no layout shift).
+   Dashed --ink-3 outline, --bg-2 fill and square corners: visibly not a WinLot card. Never pinned to the viewport. */
+.ad {
+  margin-inline: auto;
+}
+.ad-top {
+  margin-top: 16px;
+}
+.ad-bottom {
+  margin-bottom: 28px;
+}
+.ad-banner {
+  width: min(100% - 2 * var(--gutter), var(--max-w));
+  text-align: center;
+}
+.ad-label {
+  display: block;
+  font-size: 0.72rem;
+  line-height: 14px;
+  margin-bottom: 2px;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+.ad-box {
+  overflow: hidden;
+  background: var(--bg-2);
+  outline: 1px dashed var(--ink-3);
+  outline-offset: 1px;
+  border-radius: 0;
+  margin-inline: auto;
+}
+/* Phones: 320 x 100 (label + box = 116 px) */
+.ad-banner .ad-box {
+  width: 100%;
+  max-width: 320px;
+  height: 100px;
+}
+@media (min-width: 768px) {
+  .ad-banner .ad-box {
+    max-width: 728px;
+    height: 90px;
+  }
+}
+@media (min-width: 1024px) {
+  .ad-banner .ad-box {
+    max-width: 970px;
+    height: 90px;
+  }
+}
+/* Side rails exist only on wide screens; below that they reserve nothing */
+.ad-rail {
+  display: none;
+}
+@media (min-width: 1600px) {
+  .site-shell {
+    position: relative;
+  }
+  .site-shell.has-rails {
+    min-height: 680px;
+  }
+  .ad-rail {
+    display: block;
+    position: absolute;
+    top: 28px;
+    width: 160px;
+  }
+  .ad-rail .ad-box {
+    width: 160px;
+    height: 600px;
+  }
+  .ad-left {
+    right: calc(50% + var(--max-w) / 2 + 24px);
+  }
+  .ad-right {
+    left: calc(50% + var(--max-w) / 2 + 24px);
+  }
+}

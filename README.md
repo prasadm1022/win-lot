@@ -69,7 +69,13 @@ or the Development Lotteries Board. Always confirm results on the official websi
 ## Is it free?
 
 Yes. The site is free to use, has no sign-up, and the software itself is open source (see
-[License](#license)).
+[License](#license)). To cover running costs the site can show clearly labelled Google ads; they
+never change the numbers or the suggestions. See the site's `/privacy` page for how Google uses
+cookies for ads.
+
+Ads are optional and configured at build time with the `NEXT_PUBLIC_ADSENSE_*` variables listed in
+[`.env.example`](.env.example). With no publisher ID set the build has no ads, no ad script and no
+`ads.txt`.
 
 ---
 

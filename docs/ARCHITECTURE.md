@@ -13,7 +13,9 @@ GitHub Actions cron (14:30 / 16:30 UTC)
 Cloudflare build on every push (Workers Builds or Pages)
   prebuild: scripts/export-public.ts -> predictions v1 + v2 computed once -> .cache/predictions.json
                                      -> public/data/*.json (open data)
+                                     -> public/ads.txt written or removed (NEXT_PUBLIC_ADSENSE_* build vars)
   next build (output: export): app/ server components call lib/data.ts (predictions read from .cache/) -> out/
+                               app/(site)/layout.tsx -> AdFrame: Google loader + labelled ad spaces when configured
        |
        v
 Cloudflare static assets serve out/  (/l/govisetha -> l/govisetha.html, unknown -> 404.html)
@@ -28,8 +30,25 @@ Cloudflare static assets serve out/  (/l/govisetha -> l/govisetha.html, unknown 
 - `lib/stats.ts` (descriptive stats), `lib/parsers.ts` (regex HTML parsers),
   `lib/scrape.ts` (fetch, NLB cookie challenge, DLB paging), `lib/lotteries.ts` (reads `data/lotteries.json`).
 - `lib/jackpots.ts` (jackpot parsers + merge, pure), `lib/jackpot-sources.ts` (jackpot fetching + files).
-- `scripts/update.ts` - daily scrape and merge (plus the light jackpot step); `scripts/jackpots.ts` - jackpot rebuild; `scripts/export-public.ts` - prebuild: computes the predictions once (`.cache/`) and writes the open-data export.
-- Routes (UI): `/` home, `/l/[id]` detail (`generateStaticParams` over `LOTTERY_IDS`), `/about`, 404.
+- `scripts/update.ts` - daily scrape and merge (plus the light jackpot step); `scripts/jackpots.ts` - jackpot rebuild; `scripts/export-public.ts` - prebuild: computes the predictions once (`.cache/`), writes the open-data export and writes or removes `public/ads.txt`.
+- `lib/ads.ts` - Google AdSense configuration, pure and build-time only: reads the five `NEXT_PUBLIC_ADSENSE_*` build
+  variables once, validates them (invalid = unset, with a `WARNING ads:` build-log line), and is the single source for
+  the loader URL, the `ads.txt` line, the rail breakpoint `RAIL_MIN_WIDTH` (1600 px, pinned to the CSS by a test) and
+  `requestAdOnce` (one `adsbygoogle.push` per `<ins>`). No client = ads fully off.
+- `components/AdFrame.tsx` (server) - the frame of every content page: the loader `<script>` once (whenever the
+  client is valid, even with no slots, for site verification), the top and bottom banners and the >= 1600 px side
+  rails *around* `<main id="main">`, never inside it. With no client it returns exactly the plain `<main>`.
+  `components/AdSlot.tsx` (`'use client'`) - one labelled ad space (`aside` named "Advertisement", a box reserved at
+  its final size by CSS so content never moves, Google's `<ins>`); rails mount the `<ins>` only once the viewport is
+  at least 1600 px wide and never unmount it, because `adsbygoogle.push({})` fills the first unprocessed `<ins>` in
+  the document. Ad CSS: the "Ads" section at the end of `app/globals.css` (box sizes per breakpoint, rail placement).
+- Routes (UI): the content pages live in the route group `app/(site)/` (`/` home, `/l/[id]` detail
+  (`generateStaticParams` over `LOTTERY_IDS`), `/about`, `/privacy`), whose layout wraps them in `AdFrame`; the 404
+  page (`app/not-found.tsx`) stays outside the group, so it carries no loader and no ad space. `/ads.txt` is the file
+  the prebuild generates (absent when ads are off, so Cloudflare answers 404).
+  Rule: the root layout renders no `<main>`; `app/(site)/layout.tsx` (through `AdFrame`) and `app/not-found.tsx` each
+  render their own `<main id="main" tabIndex={-1}>`. Any future page outside `app/(site)/` must render its own
+  `<main id="main">` too: it is the skip-link target.
 
 ## Data files
 - `data/lotteries.json` - metadata, camelCase: `{id, name, board, sourceUrl, sourceKey, letterKind,
@@ -213,4 +232,12 @@ force a recomputation.
 ## Hosting
 `wrangler.jsonc` is a static-assets-only Worker (`assets.directory: ./out`, `not_found_handling: 404-page`,
 no `main`, no bindings, no crons). Alternative: Cloudflare Pages with build output directory `out`.
+
+Google AdSense is a build-time setting: the five build variables `NEXT_PUBLIC_ADSENSE_CLIENT` (`ca-pub-<digits>`) and
+`NEXT_PUBLIC_ADSENSE_SLOT_TOP` / `_LEFT` / `_RIGHT` / `_BOTTOM` (digits) are set in Cloudflare Workers Builds (see
+`.env.example`; public IDs, not secrets). Unset or invalid client = ads fully off: no script, no ad space, no gap, no
+`ads.txt`. A set client renders the loader on every content page; each set slot adds its labelled space. The prebuild
+prints `ads: off (...)` or `ads: on (...)` plus any `WARNING ads:` line and writes `public/ads.txt`
+(`google.com, pub-<digits>, DIRECT, f08c47fec0942fa0`) or removes it; `next build` copies it to `out/ads.txt`.
+Consent for EEA/UK/CH visitors, Auto ads (off) and blocked ad categories are AdSense account settings of the owner.
 Free-plan limits: see README.

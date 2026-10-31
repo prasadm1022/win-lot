@@ -9,3 +9,5 @@ next-env.d.ts
 *.tsbuildinfo
 data/**/*.tmp
 .cache/
+public/ads.txt
+.env*.local

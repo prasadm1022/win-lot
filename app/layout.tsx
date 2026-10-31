@@ -52,13 +52,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </nav>
           </div>
         </header>
-        <main id="main" tabIndex={-1}>
-          <div className="container">{children}</div>
-        </main>
+        {children}
         <footer className="site-footer">
           <div className="container">
             <span>Results are sourced from nlb.lk and dlb.lk. WinLot is independent and not affiliated with either board.</span>
             <span>Draws are random. Play responsibly.</span>
+            <span>
+              <Link href="/privacy">Privacy</Link>
+            </span>
           </div>
         </footer>
       </body>

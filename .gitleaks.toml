@@ -1,0 +1,16 @@
+# Gitleaks config for win-lot: default rules plus an allowlist for git-ignored build output only.
+# Next.js writes per-build preview/encryption keys into .next/ and the predictions cache lives in .cache/;
+# none of these paths are tracked (see .gitignore). Tracked source is never allowlisted here.
+title = "win-lot gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Git-ignored build artefacts (Next build output, local caches, static export, dependencies)"
+paths = [
+  '''(^|[\\/])\.next[\\/]''',
+  '''(^|[\\/])\.cache[\\/]''',
+  '''(^|[\\/])out[\\/]''',
+  '''(^|[\\/])node_modules[\\/]''',
+]

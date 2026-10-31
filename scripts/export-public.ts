@@ -4,6 +4,8 @@
 //   public/data/<id>.json        { lottery, draws, prediction, jackpots }  (prediction: v2, jackpots: JackpotStatus)
 //   public/data/<id>/draws.json  DrawSummary[] newest first (jackpot-won draws carry `jackpot`)
 //   public/data/lotteries.json   Lottery[]
+//   public/ads.txt               the AdSense authorised-sellers line; written only when a valid publisher ID is set
+//                                (NEXT_PUBLIC_ADSENSE_*, lib/ads.ts), removed otherwise
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -14,6 +16,11 @@ import {
   getPredictions,
   writePredictionsCache,
 } from "../lib/data";
+import { createRequire } from "node:module";
+import { adsSummary, adsTxtContent, getAdsConfig } from "../lib/ads";
+
+// @next/env is CommonJS (Next's own .env loader, pinned with next): no ESM named exports.
+const { loadEnvConfig } = createRequire(import.meta.url)("@next/env") as typeof import("@next/env");
 
 // v1 and v2 for all lotteries: computed here (or reused when the cache key still matches), once per build.
 const predictions = getPredictions();
@@ -51,3 +58,18 @@ for (const lottery of lotteries) {
   writeFileSync(join(dir, lottery.id, "draws.json"), JSON.stringify(draws));
 }
 console.log(`export-public: wrote ${lotteries.length} lotteries to public/data/ and the predictions to .cache/`);
+
+// Ads: print the build-time configuration and write or remove public/ads.txt (copied to out/ads.txt by `next build`).
+// Without a valid publisher ID the file is removed, so a stale one never survives a rebuild.
+// Load the .env* files the way `next build` does (Next's own loader), so ads.txt and the pages agree on the IDs.
+loadEnvConfig(process.cwd());
+const ads = getAdsConfig();
+console.log(adsSummary(ads));
+for (const message of ads.warnings) {
+  console.warn(message);
+  if (process.env.GITHUB_ACTIONS === "true") console.log(`::warning title=ads::${message}`);
+}
+const adsTxt = adsTxtContent(ads.client);
+const adsTxtPath = join(process.cwd(), "public", "ads.txt");
+if (adsTxt) writeFileSync(adsTxtPath, adsTxt);
+else rmSync(adsTxtPath, { force: true });

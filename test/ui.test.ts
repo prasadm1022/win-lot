@@ -1,10 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 // UI-only checks (components/, app/): the pure helpers and the markup rules the review findings guard. Components are
 // rendered with react-dom/server, the way the static export renders them.
+import { readFileSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { DISCLAIMER } from "../lib/model";
+import { RAIL_MIN_WIDTH, type AdsConfig } from "../lib/ads";
+import RootLayout from "../app/layout";
+import NotFound from "../app/not-found";
+import PrivacyPage, { PRIVACY_UPDATED } from "../app/(site)/privacy/page";
+import { AdFrame } from "../components/AdFrame";
+import { AdSlot } from "../components/AdSlot";
 import type { BacktestDetail, JackpotStatus, Prediction, SourceSplit, Stats } from "../lib/types";
 import { Backtest, pooledHeadline, pooledVerdict, v1BaselineNote, windowChecked } from "../components/charts/Backtest";
 import { FrequencyBars } from "../components/charts/FrequencyBars";
@@ -494,5 +501,141 @@ describe("odds line", () => {
     );
     expect(oddsFallback({ ...odds, numbersAndLetter: null }, null)).toBe("Every ticket has the same chance: 1 in 1,282,975 for the four numbers.");
     expect(oddsFallback(undefined)).toBeNull();
+  });
+});
+
+describe("ads", () => {
+  const OFF: AdsConfig = { client: null, slots: { top: null, left: null, right: null, bottom: null }, warnings: [] };
+  const CLIENT = "ca-pub-0000000000000000";
+  const ALL: AdsConfig = { client: CLIENT, slots: { top: "1111111111", left: "2222222222", right: "3333333333", bottom: "4444444444" }, warnings: [] };
+  const PLAIN_MAIN = '<main id="main" tabindex="-1"><div class="container">X</div></main>';
+  const frame = (config: AdsConfig) => render(createElement(AdFrame, { config, children: "X" }));
+  const adMarkup = /adsbygoogle|ad-|Advertisement/;
+
+  it("renders exactly today's <main> and no ad markup or loader when ads are off", () => {
+    expect(frame(OFF)).toBe(PLAIN_MAIN);
+    expect(frame(OFF)).not.toMatch(adMarkup);
+  });
+
+  it("renders the loader once and no ad space with a client but no slots (site verification)", () => {
+    const html = frame({ ...ALL, slots: OFF.slots });
+    expect(html.match(/<script/g)).toHaveLength(1);
+    expect(html).toContain(`src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${CLIENT}"`);
+    expect(html).toContain('crossorigin="anonymous"');
+    expect(html).not.toContain("data-nscript");
+    expect(html).not.toContain("<aside");
+    expect(html).toContain(PLAIN_MAIN);
+  });
+
+  it("renders only the configured positions", () => {
+    const html = frame({ ...ALL, slots: { ...OFF.slots, top: "1111111111" } });
+    expect(html.match(/<aside/g)).toHaveLength(1);
+    expect(html).toContain('class="ad ad-top ad-banner"');
+    expect(html).not.toContain("has-rails");
+    expect(html).not.toMatch(/ad-(left|right|bottom)/);
+  });
+
+  it("puts the four spaces around <main>, never inside it, in the order top, left, main, right, bottom", () => {
+    const html = frame(ALL);
+    expect(html.match(/<aside/g)).toHaveLength(4);
+    expect(html.match(/<script/g)).toHaveLength(1);
+    const at = (s: string) => html.indexOf(s);
+    expect(at("ad-top")).toBeGreaterThan(-1);
+    expect(at("ad-top")).toBeLessThan(at('class="site-shell has-rails"'));
+    expect(at("ad-left")).toBeLessThan(at('<main id="main"'));
+    expect(at('<main id="main"')).toBeLessThan(at("ad-right"));
+    expect(at("</main>")).toBeLessThan(at("ad-right"));
+    expect(at("ad-right")).toBeLessThan(at("ad-bottom"));
+    const mainHtml = html.slice(at('<main id="main"'), at("</main>"));
+    expect(mainHtml).toBe('<main id="main" tabindex="-1"><div class="container">X</div>');
+  });
+
+  it("follows the DOM contract: labelled aside, 'Advertisement' label, reserved box, <ins> with the fixed-size attributes", () => {
+    const html = render(createElement(AdSlot, { client: CLIENT, slot: "1111111111", position: "top" }));
+    expect(html).toBe(
+      '<aside class="ad ad-top ad-banner" aria-labelledby="ad-top-label"><span id="ad-top-label" class="ad-label">Advertisement</span>' +
+        '<div class="ad-box"><ins class="adsbygoogle" style="display:block;width:100%;height:100%" data-ad-client="ca-pub-0000000000000000" data-ad-slot="1111111111" data-full-width-responsive="false"></ins></div></aside>',
+    );
+    expect(html).not.toContain("data-ad-format");
+  });
+
+  it("names every space 'Advertisement' through aria-labelledby and puts no heading inside", () => {
+    const html = frame(ALL);
+    for (const pos of ["top", "left", "right", "bottom"]) {
+      expect(html).toContain(`<aside class="ad ad-${pos} ad-${pos === "left" || pos === "right" ? "rail" : "banner"}" aria-labelledby="ad-${pos}-label">`);
+      expect(html).toContain(`<span id="ad-${pos}-label" class="ad-label">Advertisement</span>`);
+    }
+    expect(html.match(/Advertisement/g)).toHaveLength(4);
+    expect(html).not.toMatch(/<h[1-6]/);
+  });
+
+  it("keeps a rail's <ins> out of the server markup (mounted only on a wide viewport) so a hidden rail never swallows a banner's push", () => {
+    const rail = render(createElement(AdSlot, { client: CLIENT, slot: "2222222222", position: "left", minWidth: RAIL_MIN_WIDTH }));
+    expect(rail).toBe(
+      '<aside class="ad ad-left ad-rail" aria-labelledby="ad-left-label"><span id="ad-left-label" class="ad-label">Advertisement</span><div class="ad-box"></div></aside>',
+    );
+    const html = frame(ALL);
+    expect(html.match(/<ins /g)).toHaveLength(2);
+    expect(html).toContain('data-ad-slot="1111111111"');
+    expect(html).toContain('data-ad-slot="4444444444"');
+    expect(html).not.toContain('data-ad-slot="2222222222"');
+  });
+
+  it("pins the Ads CSS to the rail breakpoint of lib/ads.ts and never makes an ad space sticky or fixed", () => {
+    const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
+    const start = css.indexOf("/* ---------- Ads ---------- */");
+    expect(start).toBeGreaterThan(-1);
+    const ads = css.slice(start);
+    expect(ads).toContain(`@media (min-width: ${RAIL_MIN_WIDTH}px)`);
+    expect(ads).not.toMatch(/sticky|fixed/);
+    // The reserved boxes: 320 x 100 on phones, 728 x 90 from 768 px, 970 x 90 from 1024 px, 160 x 600 rails
+    expect(ads).toMatch(/\.ad-banner \.ad-box \{[^}]*max-width: 320px;[^}]*height: 100px;/);
+    expect(ads).toMatch(/\(min-width: 768px\) \{\s*\.ad-banner \.ad-box \{[^}]*max-width: 728px;[^}]*height: 90px;/);
+    expect(ads).toMatch(/\(min-width: 1024px\) \{\s*\.ad-banner \.ad-box \{[^}]*max-width: 970px;[^}]*height: 90px;/);
+    expect(ads).toMatch(/\.ad-rail \.ad-box \{[^}]*width: 160px;[^}]*height: 600px;/);
+    expect(ads).toMatch(/\.ad-rail \{\s*display: none;/);
+    expect(ads).not.toMatch(/transition|animation/);
+  });
+});
+
+describe("privacy page, footer and 404", () => {
+  const PRIVACY_FORBIDDEN = [...FORBIDDEN, /\bodds\b/i, /\bchances?\b/i, /\bwinning\b/i];
+
+  it("explains storage, Google ads, choices, consent and the date in plain words, without odds or winning claims", () => {
+    const html = render(createElement(PrivacyPage));
+    const t = text(html);
+    for (const re of PRIVACY_FORBIDDEN) expect(t).not.toMatch(re);
+    expect(html).toContain('href="https://adssettings.google.com"');
+    expect(html).toContain('href="https://policies.google.com/technologies/partner-sites"');
+    expect(html.match(/rel="noopener noreferrer"/g)).toHaveLength(2);
+    expect(t).toContain("WinLot has no accounts, no sign-up and no forms.");
+    expect(t).toContain("European Economic Area");
+    expect(t).toContain('Every ad space is marked "Advertisement"');
+    expect(t).toContain(`Last updated ${fmtDate(PRIVACY_UPDATED)}.`);
+    expect(html.match(/<h1/g)).toHaveLength(1);
+    expect(html.match(/<h2/g)).toHaveLength(5);
+    expect(html).not.toMatch(/<h[3-6]/);
+    for (const id of ["pp-what", "pp-ads", "pp-choices", "pp-eea", "pp-changes"]) {
+      expect(html).toContain(`<section class="card prose" aria-labelledby="${id}"><h2 id="${id}">`);
+    }
+    expect(html).not.toContain("adsbygoogle");
+  });
+
+  it("links to the Privacy page from the footer of every page, ads on or off", () => {
+    const html = render(createElement(RootLayout, null, "X"));
+    const footer = html.slice(html.indexOf('<footer class="site-footer">'));
+    expect(footer).toContain('<a href="/privacy">Privacy</a>');
+    expect(html).toContain('<a href="#main" class="skip-link">Skip to content</a>');
+    expect(html).not.toContain("<main");
+  });
+
+  it("gives the 404 page its own <main id=\"main\"> (skip-link target) and no ad markup", () => {
+    const html = render(createElement(NotFound));
+    expect(html.startsWith('<main id="main" tabindex="-1"><div class="container"><div class="card">')).toBe(true);
+    expect(html).not.toMatch(/adsbygoogle|ad-box|Advertisement/);
+    const t = text(html);
+    expect(t).toContain("Page not found");
+    expect(t).toContain("That link does not go anywhere we know.");
+    expect(html).toContain('<a class="btn btn-primary" href="/">Back to home</a>');
   });
 });

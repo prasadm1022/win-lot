@@ -11,6 +11,5 @@ description = "Git-ignored build artefacts (Next build output, local caches, sta
 paths = [
   '''(^|[\\/])\.next[\\/]''',
   '''(^|[\\/])\.cache[\\/]''',
-  '''(^|[\\/])out[\\/]''',
   '''(^|[\\/])node_modules[\\/]''',
 ]

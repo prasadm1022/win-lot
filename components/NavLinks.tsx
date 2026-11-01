@@ -4,8 +4,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/about', label: 'Method' },
+  // "Home" hides on narrow phones (CSS .nav-home): the logo beside it already links home
+  { href: '/', label: 'Home', className: 'nav-home' },
+  { href: '/about', label: 'How it works' },
+  { href: '/privacy', label: 'Privacy' },
 ]
 
 /** Primary nav links with aria-current for the active route. */
@@ -14,7 +16,12 @@ export function NavLinks() {
   return (
     <>
       {LINKS.map((l) => (
-        <Link key={l.href} href={l.href} aria-current={pathname === l.href ? 'page' : undefined}>
+        <Link
+          key={l.href}
+          href={l.href}
+          className={l.className}
+          aria-current={pathname === l.href ? 'page' : undefined}
+        >
           {l.label}
         </Link>
       ))}

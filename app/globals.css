@@ -2046,6 +2046,9 @@ table.history td.num {
     padding: 8px 9px;
     font-size: 0.88rem;
   }
+  .site-nav a.nav-home {
+    display: none;
+  }
   .brand-tag {
     display: none;
   }

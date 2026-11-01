@@ -74,7 +74,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   <Link href="/">All lotteries</Link>
                 </li>
                 <li>
-                  <Link href="/about">Method</Link>
+                  <Link href="/about">How it works</Link>
                 </li>
                 <li>
                   <Link href="/privacy">Privacy</Link>

@@ -23,7 +23,7 @@ function pooledResult(): { pooled: NonNullable<BacktestDetail['pooled']>; holmAl
 }
 
 export const metadata: Metadata = {
-  title: 'Method & status',
+  title: 'How it works',
   description:
     'How WinLot marks the jackpot-winning days it knows of and weighs jackpot-winning numbers, jackpot dates and daily draws into its picks, how honest the backtest is, and when the data was last refreshed.',
 }

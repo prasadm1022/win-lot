@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   description:
     'Sri Lankan lottery results, statistics and statistical picks for NLB and DLB draws. For entertainment only; draws are random.',
   icons: { icon: '/favicon.svg' },
+  // WinLot is a project by HadesVault.com
+  authors: [{ name: 'HadesVault.com', url: 'https://hadesvault.com' }],
+  creator: 'HadesVault.com',
+  publisher: 'HadesVault.com',
   // AdSense site verification. Loads nothing; the ad script itself stays behind NEXT_PUBLIC_ADSENSE_CLIENT (AdFrame).
   other: { 'google-adsense-account': ADSENSE_PUBLISHER_ID },
 }
@@ -83,7 +87,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <div className="footer-bottom">
               <span>Draws are random. Play responsibly.</span>
               <span>
-                A <a href="https://hadesvault.com">Hades Vault</a> site
+                A project by <a href="https://hadesvault.com">HadesVault.com</a>
               </span>
             </div>
           </div>

@@ -2,6 +2,8 @@
 
 **Visit the site: [https://winlot.hadesvault.com](https://winlot.hadesvault.com)**
 
+*A project by [HadesVault.com](https://hadesvault.com).*
+
 WinLot is a free website that keeps the winning numbers of Sri Lanka's most popular lotteries
 (DLB lotteries since April 2021, NLB lotteries since March 2026) and turns them into easy-to-read
 charts and suggested numbers for the next draw.

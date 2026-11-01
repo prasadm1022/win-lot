@@ -26,12 +26,13 @@ export default function PrivacyPage() {
       <section className="card prose" aria-labelledby="pp-who">
         <h2 id="pp-who">Who runs WinLot</h2>
         <p>
-          WinLot is run by Hades Vault, a software studio in Sri Lanka, and lives at winlot.hadesvault.com. It is one of the sites
-          Hades Vault hosts under hadesvault.com, and all of them follow the same rules for ads and cookies. The{' '}
-          <a href="https://hadesvault.com/privacy">Hades Vault privacy policy</a> covers the rest of hadesvault.com.
+          WinLot is a project by <a href="https://hadesvault.com">HadesVault.com</a>, a software studio in Sri Lanka, and lives
+          at winlot.hadesvault.com. It is one of the sites HadesVault.com hosts under its domain, and all of them follow the
+          same rules for ads and cookies. The <a href="https://hadesvault.com/privacy">HadesVault.com privacy policy</a> covers
+          the rest of hadesvault.com.
         </p>
         <p>
-          For questions about this policy, use the <a href="https://hadesvault.com/contact">Hades Vault contact page</a>.
+          For questions about this policy, use the <a href="https://hadesvault.com/contact">HadesVault.com contact page</a>.
         </p>
       </section>
 
@@ -91,7 +92,7 @@ export default function PrivacyPage() {
 
       <section className="card prose" aria-labelledby="pp-changes">
         <h2 id="pp-changes">Changes to this policy</h2>
-        <p>This page changes when WinLot&apos;s or Hades Vault&apos;s use of ads or storage changes. The date below shows the latest version.</p>
+        <p>This page changes when WinLot&apos;s or HadesVault.com&apos;s use of ads or storage changes. The date below shows the latest version.</p>
       </section>
 
       <p className="small muted">Last updated {fmtDate(PRIVACY_UPDATED)}.</p>

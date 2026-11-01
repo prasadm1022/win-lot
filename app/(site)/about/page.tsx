@@ -50,6 +50,9 @@ export default function AboutPage() {
       <header>
         <p className="eyebrow">About</p>
         <h1>How WinLot works</h1>
+        <p className="muted">
+          A project by <a href="https://hadesvault.com">HadesVault.com</a>.
+        </p>
       </header>
 
       <Disclaimer />

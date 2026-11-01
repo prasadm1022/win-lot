@@ -12,10 +12,10 @@ import { fmtDate, fmtMonthYear } from '@/components/util/format'
 import { BOARD_NAME, homeJsonLd, pageMetadata } from '@/lib/seo'
 
 const HOME_DESCRIPTION =
-  'Latest Sri Lanka lottery results for NLB and DLB: Dhana Nidhanaya, Mega Power, Govisetha, Ada Kotipathi, Super Ball, Shanida and Kapruka, with draw history.'
+  'Next-draw lottery predictions for every NLB and DLB lottery, calculated daily from the official results: Mega Power, Govisetha, Dhana Nidhanaya and more.'
 
 export const metadata = pageMetadata({
-  title: 'WinLot - Sri Lanka Lottery Results Today, NLB & DLB',
+  title: 'WinLot - Sri Lanka Lottery Predictions, NLB & DLB',
   description: HOME_DESCRIPTION,
   path: '/',
   absoluteTitle: true,
@@ -106,9 +106,9 @@ export default function HomePage() {
         <div className="card-head">
           <div>
             <p className="eyebrow">Seven lotteries</p>
-            <h2 id="lotteries-title">Latest results, jackpots and picks</h2>
+            <h2 id="lotteries-title">Next draw predictions</h2>
           </div>
-          <p className="card-sub">Tap a lottery for its jackpot wins, charts, history and the full set of picks.</p>
+          <p className="card-sub">Tap a lottery for its full set of predictions, the maths behind them and its draw history.</p>
         </div>
 
         {lotteries.length === 0 ? (
@@ -129,12 +129,14 @@ export default function HomePage() {
       </section>
 
       <section className="card prose about-lotteries" aria-labelledby="about-lotteries-title">
-        <h2 id="about-lotteries-title">Sri Lanka lottery results in one place</h2>
+        <h2 id="about-lotteries-title">Lottery predictions calculated from official results</h2>
         <p>
-          WinLot collects the official results of Sri Lanka&apos;s two lottery boards every evening and keeps the full archive:
-          the National Lotteries Board (NLB) since {archiveFrom('NLB')} and the Development Lotteries Board (DLB) since{' '}
-          {archiveFrom('DLB')}. Each lottery page shows the latest result, every past draw, the jackpot wins we know of and number
-          statistics.
+          WinLot is a prediction tool. Every evening it reads the official results published by the{' '}
+          <a href="https://www.nlb.lk">National Lotteries Board (nlb.lk)</a> and the{' '}
+          <a href="https://www.dlb.lk">Development Lotteries Board (dlb.lk)</a>, and calculates predictions for each
+          lottery&apos;s next draw from them: NLB results since {archiveFrom('NLB')}, DLB results since {archiveFrom('DLB')}. The
+          results belong to the two boards; WinLot only does the maths. Each lottery page shows its predictions, how they were
+          calculated and the draw history they are based on.
         </p>
         <div className="board-lists">
           {(['NLB', 'DLB'] as const).map((board) => (
@@ -145,24 +147,27 @@ export default function HomePage() {
               <ul>
                 {lotteries
                   .filter((l) => l.board === board)
-                  .map((l) => (
-                    <li key={l.id}>
-                      <Link href={`/l/${l.id}`}>{l.name} results</Link>
-                      {l.lastDraw ? (
-                        <span className="muted small">
-                          {' '}
-                          · draw {l.lastDraw.drawNo}, {fmtDate(l.lastDraw.date)}
-                        </span>
-                      ) : null}
-                    </li>
-                  ))}
+                  .map((l) => {
+                    const p = predictions.get(l.id)
+                    return (
+                      <li key={l.id}>
+                        <Link href={`/l/${l.id}`}>{l.name} predictions</Link>
+                        {p ? (
+                          <span className="muted small">
+                            {' '}
+                            · next draw {p.nextDrawNo}, {fmtDate(p.nextDrawDate)}
+                          </span>
+                        ) : null}
+                      </li>
+                    )
+                  })}
               </ul>
             </div>
           ))}
         </div>
         <p className="small muted">
-          WinLot is independent and not affiliated with either board. Always check a ticket against the official result before
-          claiming a prize.
+          WinLot is independent and not affiliated with either board. Always check a ticket against the official result on nlb.lk
+          or dlb.lk before claiming a prize.
         </p>
       </section>
 

@@ -4,9 +4,12 @@
 
 *A project by [HadesVault.com](https://hadesvault.com).*
 
-WinLot is a free website that keeps the winning numbers of Sri Lanka's most popular lotteries
-(DLB lotteries since April 2021, NLB lotteries since March 2026) and turns them into easy-to-read
-charts and suggested numbers for the next draw.
+WinLot is a free lottery prediction tool for Sri Lanka. It calculates number predictions for the
+next draw of the country's most popular lotteries from their official results, published by the
+[National Lotteries Board](https://www.nlb.lk) (nlb.lk, since March 2026) and the
+[Development Lotteries Board](https://www.dlb.lk) (dlb.lk, since April 2021). The results belong to
+the two boards; WinLot only does the maths, and shows how each prediction was calculated. Draws are
+random, so the predictions are for fun.
 
 ## What lotteries does it cover?
 

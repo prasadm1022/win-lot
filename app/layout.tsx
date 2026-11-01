@@ -15,11 +15,11 @@ import './globals.css'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'WinLot - Sri Lanka Lottery Results, NLB & DLB',
+    default: 'WinLot - Sri Lanka Lottery Predictions, NLB & DLB',
     template: '%s - WinLot',
   },
   description:
-    'Latest Sri Lanka lottery results for all NLB and DLB lotteries, with draw history, number statistics and known jackpot wins. Updated daily.',
+    'Lottery prediction tool for Sri Lanka: next-draw predictions for every NLB and DLB lottery, calculated daily from the official results.',
   applicationName: 'WinLot',
   category: 'reference',
   // Draw numbers are not phone numbers: stop iOS turning them into call links.
@@ -76,7 +76,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   <LogoMark className="brand-mark" size={26} />
                   WinLot
                 </Link>
-                <p>Results are sourced from nlb.lk and dlb.lk. WinLot is independent and not affiliated with either board.</p>
+                <p>
+                  Lottery predictions calculated from the official results of the{' '}
+                  <a href="https://www.nlb.lk">National Lotteries Board (nlb.lk)</a> and the{' '}
+                  <a href="https://www.dlb.lk">Development Lotteries Board (dlb.lk)</a>. The results are theirs; WinLot only does
+                  the maths and is not affiliated with either board.
+                </p>
               </div>
               <ul className="footer-links">
                 <li>

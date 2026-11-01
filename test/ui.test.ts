@@ -340,8 +340,10 @@ describe("hero", () => {
     expect(html).toContain('role="group" aria-label="Showcased lottery"');
     expect(html).toContain('aria-pressed="true"');
     expect(html).toContain("Pause");
-    // Copy: the claim is about the jackpot days we know of, and the note's full stop does not precede the separator.
-    expect(html).toContain("Known jackpot days marked.");
+    // Copy: WinLot is a prediction tool, the jackpot claim is about the days we know of, and the note's full stop does not
+    // precede the separator.
+    expect(html).toContain("Sri Lanka lottery predictions for the next draw.");
+    expect(html).toContain("Known jackpot days marked:");
     expect(html).toContain("jackpot combinations first · for fun, not a forecast");
     expect(html).toContain("NLB prize tables from March 2026");
   });

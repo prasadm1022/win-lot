@@ -67,9 +67,24 @@ export function LotteryCard({ lottery, prediction, jackpots, sums }: Props) {
         <span className={`badge badge-${lottery.board.toLowerCase()}`}>{lottery.board}</span>
       </div>
 
+      {/* The prediction leads: it is what WinLot is for. The latest official result follows as context. */}
+      <div className="lc-pick">
+        <p className="row-label">
+          <span>{prediction ? `Prediction for draw #${prediction.nextDrawNo}` : 'Prediction for the next draw'}</span>
+          {top ? <span>for fun</span> : null}
+        </p>
+        {top ? (
+          <BallRow letter={top.letter} numbers={top.numbers} bonus={top.bonus} bonusLabel={lottery.bonusLabel} size="sm" caption="Top pick" />
+        ) : (
+          <p className="muted small" style={{ margin: 0 }}>
+            Predictions appear after the first draws are recorded.
+          </p>
+        )}
+      </div>
+
       <div>
         <p className="row-label">
-          <span>Latest draw</span>
+          <span>Latest official result</span>
           {lottery.lastDraw ? (
             <span>
               #{lottery.lastDraw.drawNo} · {fmtDate(lottery.lastDraw.date)}
@@ -93,20 +108,6 @@ export function LotteryCard({ lottery, prediction, jackpots, sums }: Props) {
         ) : (
           <p className="muted small" style={{ margin: 0 }}>
             No draws recorded yet.
-          </p>
-        )}
-      </div>
-
-      <div>
-        <p className="row-label">
-          <span>Top pick for next draw</span>
-          {top ? <span>for fun</span> : null}
-        </p>
-        {top ? (
-          <BallRow letter={top.letter} numbers={top.numbers} bonus={top.bonus} bonusLabel={lottery.bonusLabel} size="sm" caption="Top pick" />
-        ) : (
-          <p className="muted small" style={{ margin: 0 }}>
-            Picks appear after the first draws are recorded.
           </p>
         )}
       </div>

@@ -968,6 +968,15 @@ main {
   font-family: var(--font-body);
   font-weight: 400;
 }
+.lottery-card .lc-pick {
+  margin: 0 -8px;
+  padding: 10px 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+}
+.lottery-card .lc-pick .row-label {
+  color: var(--accent-ink);
+}
 .lottery-card .row-label {
   font-size: 0.7rem;
   font-weight: 600;

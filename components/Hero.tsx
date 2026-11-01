@@ -66,13 +66,13 @@ export function Hero({ items, nlbCheckedFrom = null }: Props) {
   return (
     <section className="hero" aria-labelledby="hero-title">
       <div>
-        <p className="eyebrow">NLB · DLB · updated daily</p>
-        <h1 id="hero-title">Sri Lanka lottery results. Known jackpot days marked.</h1>
+        <p className="eyebrow">Lottery prediction tool · NLB · DLB</p>
+        <h1 id="hero-title">Sri Lanka lottery predictions for the next draw.</h1>
         <p className="hero-lede">
-          The latest NLB and DLB results for all seven Sri Lankan lotteries, with every jackpot win we know of marked on its draw:
-          NLB prize tables{nlbFrom}, and for DLB, which publishes no winners list, wins inferred from now on when its advertised
-          jackpot drops. The picks weigh jackpot-winning numbers first, then jackpot dates, then the daily draws. Draws are random,
-          so every ticket has the same chance: the picks are for fun.
+          WinLot calculates number predictions for all seven Sri Lankan lotteries from the official NLB and DLB results. It weighs
+          the numbers of known jackpot wins first, then jackpot dates, then the daily draws, and shows that split plainly. Known
+          jackpot days marked: NLB prize tables{nlbFrom}, and for DLB, which publishes no winners list, wins inferred from now on
+          when its advertised jackpot drops. Draws are random, so every ticket has the same chance: the predictions are for fun.
         </p>
         {current ? (
           <div style={{ margin: '18px 0 4px' }}>
@@ -85,7 +85,7 @@ export function Hero({ items, nlbCheckedFrom = null }: Props) {
         ) : null}
         <div className="hero-actions">
           <a href="#lotteries" className="btn btn-primary">
-            See all picks
+            See all predictions
           </a>
           <Link href="/about" className="btn">
             How it works

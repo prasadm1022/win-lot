@@ -8,12 +8,17 @@ export const SITE_URL = "https://winlot.hadesvault.com";
 export const SITE_NAME = "WinLot";
 export const PUBLISHER = { name: "HadesVault.com", url: "https://hadesvault.com" } as const;
 /** Social share image (public/og.png, 1200 x 630). */
-export const OG_IMAGE = { url: "/og.png", width: 1200, height: 630, alt: "WinLot - Sri Lanka lottery results and statistics" };
+export const OG_IMAGE = { url: "/og.png", width: 1200, height: 630, alt: "WinLot - Sri Lanka lottery predictions, NLB and DLB" };
 
-export const BOARD_NAME: Record<string, string> = {
-  NLB: "National Lotteries Board",
-  DLB: "Development Lotteries Board",
+/** The official sources every result comes from: WinLot only does the maths on what the boards publish. */
+export const BOARD_SOURCE: Record<string, { name: string; url: string; host: string }> = {
+  NLB: { name: "National Lotteries Board", url: "https://www.nlb.lk", host: "nlb.lk" },
+  DLB: { name: "Development Lotteries Board", url: "https://www.dlb.lk", host: "dlb.lk" },
 };
+
+export const BOARD_NAME: Record<string, string> = Object.fromEntries(
+  Object.entries(BOARD_SOURCE).map(([board, s]) => [board, s.name]),
+);
 
 /** A path resolved against the canonical origin, unslashed ("/" -> "https://winlot.hadesvault.com"). */
 export const absUrl = (path: string): string => new URL(path, SITE_URL).toString().replace(/\/$/, "");
@@ -83,7 +88,12 @@ const webPage = (type: string, path: string, name: string, description: string) 
   ...(path === "/" ? {} : { breadcrumb: { "@id": `${absUrl(path)}#breadcrumb` } }),
 });
 
-/** Home: the site, its publisher, and the seven lottery pages as an ordered list. */
+const boardOrg = (board: string) => {
+  const s = BOARD_SOURCE[board];
+  return s ? { "@type": "GovernmentOrganization", name: s.name, url: s.url } : { "@type": "Organization", name: board };
+};
+
+/** Home: the site, the prediction tool itself, its publisher, and the seven lottery pages as an ordered list. */
 export function homeJsonLd(lotteries: Pick<Lottery, "id" | "name" | "board">[], description: string): object {
   return {
     "@context": "https://schema.org",
@@ -97,15 +107,27 @@ export function homeJsonLd(lotteries: Pick<Lottery, "id" | "name" | "board">[], 
         inLanguage: "en",
         publisher: { "@id": ORG_ID },
       },
+      {
+        "@type": "WebApplication",
+        name: `${SITE_NAME} lottery prediction tool`,
+        url: SITE_URL,
+        description,
+        applicationCategory: "UtilitiesApplication",
+        operatingSystem: "Any",
+        isAccessibleForFree: true,
+        offers: { "@type": "Offer", price: "0", priceCurrency: "LKR" },
+        isBasedOn: Object.values(BOARD_SOURCE).map((s) => s.url),
+        publisher: { "@id": ORG_ID },
+      },
       organization,
-      webPage("CollectionPage", "/", `${SITE_NAME} - Sri Lanka lottery results`, description),
+      webPage("CollectionPage", "/", `${SITE_NAME} - Sri Lanka lottery predictions`, description),
       {
         "@type": "ItemList",
-        name: "Sri Lanka lottery results",
+        name: "Sri Lanka lottery predictions",
         itemListElement: lotteries.map((l, i) => ({
           "@type": "ListItem",
           position: i + 1,
-          name: `${l.name} results (${l.board})`,
+          name: `${l.name} predictions (${l.board})`,
           url: absUrl(`/l/${l.id}`),
         })),
       },
@@ -113,7 +135,10 @@ export function homeJsonLd(lotteries: Pick<Lottery, "id" | "name" | "board">[], 
   };
 }
 
-/** A lottery page: the page, its breadcrumb, and its draw archive as a Dataset with the open-data JSON download. */
+/**
+ * A lottery page: the page, its breadcrumb, and the official draw archive it is calculated from as a Dataset - created by
+ * the lottery board, republished by HadesVault.com - with the open-data JSON download.
+ */
 export function lotteryJsonLd(lottery: Lottery, description: string): object {
   const path = `/l/${lottery.id}`;
   const board = BOARD_NAME[lottery.board] ?? lottery.board;
@@ -121,21 +146,22 @@ export function lotteryJsonLd(lottery: Lottery, description: string): object {
   return {
     "@context": "https://schema.org",
     "@graph": [
-      webPage("WebPage", path, `${lottery.name} results`, description),
+      webPage("WebPage", path, `${lottery.name} predictions`, description),
       breadcrumb(path, lottery.name),
       ...(last
         ? [
             {
               "@type": "Dataset",
               "@id": `${absUrl(path)}#dataset`,
-              name: `${lottery.name} draw results`,
-              description: `Every ${lottery.name} draw of the ${board} (${lottery.board}) since ${lottery.firstDate}: draw number, date and the numbers drawn. Collected daily from the board's public results.`,
+              name: `${lottery.name} official draw results`,
+              description: `Every ${lottery.name} draw of the ${board} (${lottery.board}) since ${lottery.firstDate}: draw number, date and the numbers drawn, as published by the board and used to calculate WinLot's predictions.`,
               url: absUrl(path),
-              keywords: [`${lottery.name} results`, `${lottery.board} results`, "Sri Lanka lottery results"],
+              keywords: [`${lottery.name} prediction`, `${lottery.name} results`, `${lottery.board} results`],
               temporalCoverage: `${lottery.firstDate}/${last.date}`,
               spatialCoverage: { "@type": "Place", name: "Sri Lanka" },
               isAccessibleForFree: true,
-              creator: { "@id": ORG_ID },
+              creator: boardOrg(lottery.board),
+              isBasedOn: BOARD_SOURCE[lottery.board]?.url,
               publisher: { "@id": ORG_ID },
               dateModified: last.date,
               distribution: {

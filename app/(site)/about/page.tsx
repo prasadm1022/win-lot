@@ -25,9 +25,13 @@ function pooledResult(): { pooled: NonNullable<BacktestDetail['pooled']>; holmAl
 }
 
 const DESCRIPTION =
-  'How WinLot collects NLB and DLB lottery results daily, marks the jackpot wins it knows of and builds its picks, with an honest backtest and data status.'
+  'How WinLot calculates its lottery predictions from the official NLB and DLB results: the method, the weights, an honest backtest and the data status.'
 
-export const metadata: Metadata = pageMetadata({ title: 'How It Works - Sri Lanka Lottery Results', description: DESCRIPTION, path: '/about' })
+export const metadata: Metadata = pageMetadata({
+  title: 'How the Lottery Predictions Work',
+  description: DESCRIPTION,
+  path: '/about',
+})
 
 export default function AboutPage() {
   const status = getStatus()
@@ -49,8 +53,8 @@ export default function AboutPage() {
   return (
     <div className="stack">
       <header>
-        <p className="eyebrow">About</p>
-        <h1>How WinLot works</h1>
+        <p className="eyebrow">How it works</p>
+        <h1>How WinLot calculates its predictions</h1>
         <p className="muted">
           A project by <a href="https://hadesvault.com">HadesVault.com</a>.
         </p>
@@ -179,7 +183,7 @@ export default function AboutPage() {
           confirm winning numbers with the official source before claiming a prize.
         </p>
       </section>
-      <JsonLd data={pageJsonLd('AboutPage', '/about', 'How it works', DESCRIPTION)} />
+      <JsonLd data={pageJsonLd('AboutPage', '/about', 'How the predictions work', DESCRIPTION)} />
     </div>
   )
 }

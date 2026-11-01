@@ -47,7 +47,9 @@ Cloudflare static assets serve out/  (/l/govisetha -> l/govisetha.html, unknown 
   schema.org JSON-LD graphs (`WebSite` + `Organization` on home, `WebPage` + `BreadcrumbList` + a `Dataset` of the draw
   archive with its `/data/<id>.json` download on each lottery page), rendered by `components/JsonLd.tsx`.
   `app/robots.ts` and `app/sitemap.ts` emit `robots.txt` and `sitemap.xml` (lottery pages dated by their newest draw).
-  Lottery page titles and descriptions carry the latest draw number and result, the words people search the day after.
+  WinLot presents itself as a prediction tool: lottery page titles and descriptions lead with the prediction for the next
+  draw number, then the latest official result. `BOARD_SOURCE` credits the official sources (nlb.lk, dlb.lk) in the
+  footer, page intros, result and history cards, and as the `creator` of each Dataset.
 - Routes (UI): the content pages live in the route group `app/(site)/` (`/` home, `/l/[id]` detail
   (`generateStaticParams` over `LOTTERY_IDS`), `/about`, `/privacy`), whose layout wraps them in `AdFrame`; the 404
   page (`app/not-found.tsx`) stays outside the group, so it carries no loader and no ad space. `/ads.txt` is the static

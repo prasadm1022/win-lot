@@ -5,6 +5,8 @@ import type { BacktestDetail, Board } from '@/lib/types'
 import { fmtDateTime, fmtMonthYear } from '@/components/util/format'
 import { Disclaimer, EmptyState } from '@/components/Notices'
 import { pooledHeadline } from '@/components/charts/Backtest'
+import { JsonLd } from '@/components/JsonLd'
+import { pageJsonLd, pageMetadata } from '@/lib/seo'
 
 /**
  * The pooled backtest result and its Holm family (attached to every lottery's payload by predictAllV2), from the first
@@ -22,11 +24,10 @@ function pooledResult(): { pooled: NonNullable<BacktestDetail['pooled']>; holmAl
   return null
 }
 
-export const metadata: Metadata = {
-  title: 'How it works',
-  description:
-    'How WinLot marks the jackpot-winning days it knows of and weighs jackpot-winning numbers, jackpot dates and daily draws into its picks, how honest the backtest is, and when the data was last refreshed.',
-}
+const DESCRIPTION =
+  'How WinLot collects NLB and DLB lottery results daily, marks the jackpot wins it knows of and builds its picks, with an honest backtest and data status.'
+
+export const metadata: Metadata = pageMetadata({ title: 'How It Works - Sri Lanka Lottery Results', description: DESCRIPTION, path: '/about' })
 
 export default function AboutPage() {
   const status = getStatus()
@@ -178,6 +179,7 @@ export default function AboutPage() {
           confirm winning numbers with the official source before claiming a prize.
         </p>
       </section>
+      <JsonLd data={pageJsonLd('AboutPage', '/about', 'How it works', DESCRIPTION)} />
     </div>
   )
 }

@@ -6,15 +6,24 @@ import { NavLinks } from '@/components/NavLinks'
 import { LogoMark } from '@/components/LogoMark'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { ADSENSE_PUBLISHER_ID } from '@/lib/ads'
+import { SITE_URL } from '@/lib/seo'
 import './globals.css'
 
+// Shared defaults, also the 404 page's fallback. Every content page sets its own title, description, canonical URL,
+// Open Graph and Twitter card through pageMetadata() (lib/seo.ts); a canonical here would make every page claim to be
+// the home page.
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: 'WinLot - Sri Lanka lottery statistics and picks',
+    default: 'WinLot - Sri Lanka Lottery Results, NLB & DLB',
     template: '%s - WinLot',
   },
   description:
-    'Sri Lankan lottery results, statistics and statistical picks for NLB and DLB draws. For entertainment only; draws are random.',
+    'Latest Sri Lanka lottery results for all NLB and DLB lotteries, with draw history, number statistics and known jackpot wins. Updated daily.',
+  applicationName: 'WinLot',
+  category: 'reference',
+  // Draw numbers are not phone numbers: stop iOS turning them into call links.
+  formatDetection: { telephone: false },
   icons: { icon: '/favicon.svg', apple: '/apple-icon.png' },
   // WinLot is a project by HadesVault.com
   authors: [{ name: 'HadesVault.com', url: 'https://hadesvault.com' }],

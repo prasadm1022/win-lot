@@ -67,12 +67,12 @@ export function Hero({ items, nlbCheckedFrom = null }: Props) {
     <section className="hero" aria-labelledby="hero-title">
       <div>
         <p className="eyebrow">NLB · DLB · updated daily</p>
-        <h1 id="hero-title">Every draw charted. Known jackpot days marked.</h1>
+        <h1 id="hero-title">Sri Lanka lottery results. Known jackpot days marked.</h1>
         <p className="hero-lede">
-          Results and statistics for all seven Sri Lankan lotteries, with every jackpot win we know of marked on its draw: NLB prize
-          tables{nlbFrom}, and for DLB, which publishes no winners list, wins inferred from now on when its advertised jackpot drops.
-          The picks weigh jackpot-winning numbers first, then jackpot dates, then the daily draws, and show that split plainly. Draws
-          are random, so every ticket has the same chance: the picks are for fun.
+          The latest NLB and DLB results for all seven Sri Lankan lotteries, with every jackpot win we know of marked on its draw:
+          NLB prize tables{nlbFrom}, and for DLB, which publishes no winners list, wins inferred from now on when its advertised
+          jackpot drops. The picks weigh jackpot-winning numbers first, then jackpot dates, then the daily draws. Draws are random,
+          so every ticket has the same chance: the picks are for fun.
         </p>
         {current ? (
           <div style={{ margin: '18px 0 4px' }}>

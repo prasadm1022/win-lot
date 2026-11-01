@@ -42,6 +42,12 @@ Cloudflare static assets serve out/  (/l/govisetha -> l/govisetha.html, unknown 
   its final size by CSS so content never moves, Google's `<ins>`); rails mount the `<ins>` only once the viewport is
   at least 1600 px wide and never unmount it, because `adsbygoogle.push({})` fills the first unprocessed `<ins>` in
   the document. Ad CSS: the "Ads" section at the end of `app/globals.css` (box sizes per breakpoint, rail placement).
+- Search (SEO): `lib/seo.ts` holds the canonical origin (`https://winlot.hadesvault.com`), `pageMetadata()` (title,
+  description, canonical, Open Graph and Twitter card, all pointing at the same URL; share image `public/og.png`) and the
+  schema.org JSON-LD graphs (`WebSite` + `Organization` on home, `WebPage` + `BreadcrumbList` + a `Dataset` of the draw
+  archive with its `/data/<id>.json` download on each lottery page), rendered by `components/JsonLd.tsx`.
+  `app/robots.ts` and `app/sitemap.ts` emit `robots.txt` and `sitemap.xml` (lottery pages dated by their newest draw).
+  Lottery page titles and descriptions carry the latest draw number and result, the words people search the day after.
 - Routes (UI): the content pages live in the route group `app/(site)/` (`/` home, `/l/[id]` detail
   (`generateStaticParams` over `LOTTERY_IDS`), `/about`, `/privacy`), whose layout wraps them in `AdFrame`; the 404
   page (`app/not-found.tsx`) stays outside the group, so it carries no loader and no ad space. `/ads.txt` is the static

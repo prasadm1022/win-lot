@@ -2,8 +2,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { LOTTERY_IDS, getDraws, getJackpotStatus, getLottery, getPrediction, getStatus } from '@/lib/data'
-import type { Prediction } from '@/lib/types'
+import { LOTTERY_IDS, getDraws, getJackpotStatus, getLotteries, getLottery, getPrediction, getStatus } from '@/lib/data'
+import type { Lottery, Prediction } from '@/lib/types'
+import { BOARD_NAME, lotteryJsonLd, pageMetadata, ticketText } from '@/lib/seo'
+import { JsonLd } from '@/components/JsonLd'
+import { orderIndex } from '@/components/util/lotteryMeta'
 import { fmtDate, fmtDateTime, fmtInt } from '@/components/util/format'
 import { metaFor } from '@/components/util/lotteryMeta'
 import { BallRow } from '@/components/Ball'
@@ -29,11 +32,22 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const { id } = await params
   const lottery = getLottery(id)
   if (!lottery) return { title: 'Lottery not found' }
-  const last = lottery.lastDraw ? ` Latest draw #${lottery.lastDraw.drawNo} on ${fmtDate(lottery.lastDraw.date)}.` : ''
-  return {
-    title: lottery.name,
-    description: `${lottery.name} (${lottery.board}) results with its known jackpot wins listed, number statistics and picks for the next draw.${last} For entertainment only; draws are random and every ticket has the same chance.`,
-  }
+  return pageMetadata({ title: lotteryTitle(lottery), description: lotteryDescription(lottery), path: `/l/${id}` })
+}
+
+/** "Mega Power Results - Latest Draw 2705 (NLB)": the draw number is what people search for the day after. */
+function lotteryTitle(lottery: Lottery): string {
+  const last = lottery.lastDraw
+  return last ? `${lottery.name} Results - Latest Draw ${last.drawNo} (${lottery.board})` : `${lottery.name} Results (${lottery.board})`
+}
+
+/** The latest result itself, then what else the page holds. */
+function lotteryDescription(lottery: Lottery): string {
+  const last = lottery.lastDraw
+  const latest = last
+    ? `Latest ${lottery.name} result: draw ${last.drawNo} on ${fmtDate(last.date)} - ${ticketText(last)}. `
+    : `${lottery.name} results from the ${BOARD_NAME[lottery.board] ?? lottery.board}. `
+  return `${latest}${lottery.board} ${lottery.name} draw history, statistics and known jackpot wins, updated daily.`
 }
 
 function safePrediction(id: string): Prediction | null {
@@ -56,6 +70,9 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
   const draws = hasDraws ? getDraws(id) : []
   const jackpots = getJackpotStatus(id)
   const status = getStatus()
+  const others = getLotteries()
+    .filter((l) => l.id !== id)
+    .sort((a, b) => orderIndex(a.id) - orderIndex(b.id))
   const { mainCount, mainMin, mainMax } = lottery
 
   return (
@@ -73,13 +90,14 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
             {lottery.hasBonus ? ` + ${lottery.bonusLabel ?? 'bonus'}` : ''}
           </p>
           <h1>
-            {lottery.name}{' '}
+            {lottery.name} results{' '}
             {meta.si ? (
               <span className="native">
                 <span lang="si">{meta.si}</span> · <span lang="ta">{meta.ta}</span>
               </span>
             ) : null}
           </h1>
+          <p className="page-intro">{introText(lottery)}</p>
         </div>
         {prediction ? (
           <div>
@@ -94,7 +112,7 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
       <section className="card" aria-labelledby="latest-title">
         <div className="card-head">
           <h2 id="latest-title" style={{ fontSize: '1.2rem' }}>
-            Latest draw
+            Latest {lottery.name} result
           </h2>
           {lottery.lastDraw ? (
             <p className="card-sub">
@@ -153,7 +171,7 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
         <div className="card-head">
           <div>
             <p className="eyebrow">Archive</p>
-            <h2 id="hist-title">Draw history</h2>
+            <h2 id="hist-title">{lottery.name} draw history</h2>
           </div>
           <p className="card-sub">
             {fmtInt(draws.length)} draws
@@ -163,7 +181,33 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
         <HistoryTable id={id} initial={draws.slice(0, PAGE)} total={draws.length} bonusLabel={lottery.bonusLabel} />
       </section>
 
+      <nav className="card related" aria-labelledby="related-title">
+        <h2 id="related-title">More Sri Lanka lottery results</h2>
+        <ul className="related-list">
+          {others.map((o) => (
+            <li key={o.id}>
+              <Link href={`/l/${o.id}`}>{o.name} results</Link> <span className="muted small">{o.board}</span>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
       <Disclaimer />
+      <JsonLd data={lotteryJsonLd(lottery, lotteryDescription(lottery))} />
     </div>
+  )
+}
+
+/** One plain paragraph under the heading: what the lottery is and what the page holds, in the words people search. */
+function introText(lottery: Lottery): string {
+  const board = BOARD_NAME[lottery.board] ?? lottery.board
+  const letter = lottery.letterKind === 'zodiac' ? 'a zodiac sign, ' : lottery.letterKind !== 'none' ? 'a letter, ' : ''
+  const bonus = lottery.hasBonus ? ` and a ${lottery.bonusLabel ?? 'bonus number'}` : ''
+  const archive =
+    lottery.drawCount > 0 ? `the full ${lottery.name} draw history (${fmtInt(lottery.drawCount)} draws since ${fmtDate(lottery.firstDate)}), ` : ''
+  return (
+    `${lottery.name} is a ${board} (${lottery.board}) lottery. A ticket has ${letter}${lottery.mainCount} numbers from ` +
+    `${lottery.mainMin} to ${lottery.mainMax}${bonus}. This page shows the latest ${lottery.name} result, ${archive}` +
+    `the jackpot wins we know of, number statistics and picks for the next draw - for fun only, as every draw is random.`
   )
 }

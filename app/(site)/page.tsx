@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
+import Link from 'next/link'
 import { getJackpotStatus, getLotteries, getPrediction, getStats, getStatus } from '@/lib/data'
 import type { JackpotStatus, Prediction } from '@/lib/types'
 import { orderIndex } from '@/components/util/lotteryMeta'
@@ -6,6 +7,19 @@ import { Hero, type Showcase } from '@/components/Hero'
 import { LotteryCard } from '@/components/LotteryCard'
 import { Disclaimer, EmptyState } from '@/components/Notices'
 import { StaleNotice } from '@/components/StaleNotice'
+import { JsonLd } from '@/components/JsonLd'
+import { fmtDate, fmtMonthYear } from '@/components/util/format'
+import { BOARD_NAME, homeJsonLd, pageMetadata } from '@/lib/seo'
+
+const HOME_DESCRIPTION =
+  'Latest Sri Lanka lottery results for NLB and DLB: Dhana Nidhanaya, Mega Power, Govisetha, Ada Kotipathi, Super Ball, Shanida and Kapruka, with draw history.'
+
+export const metadata = pageMetadata({
+  title: 'WinLot - Sri Lanka Lottery Results Today, NLB & DLB',
+  description: HOME_DESCRIPTION,
+  path: '/',
+  absoluteTitle: true,
+})
 
 function safePrediction(id: string): Prediction | null {
   try {
@@ -74,6 +88,14 @@ export default function HomePage() {
     return f && (!acc || f < acc) ? f : acc
   }, null)
   const status = getStatus()
+  // The archive start per board, from the data, so the sentence stays true as the archive grows.
+  const archiveFrom = (board: 'NLB' | 'DLB') =>
+    fmtMonthYear(
+      lotteries
+        .filter((l) => l.board === board && l.drawCount > 0)
+        .map((l) => l.firstDate)
+        .sort()[0],
+    )
 
   return (
     <div className="stack">
@@ -106,7 +128,46 @@ export default function HomePage() {
         )}
       </section>
 
+      <section className="card prose about-lotteries" aria-labelledby="about-lotteries-title">
+        <h2 id="about-lotteries-title">Sri Lanka lottery results in one place</h2>
+        <p>
+          WinLot collects the official results of Sri Lanka&apos;s two lottery boards every evening and keeps the full archive:
+          the National Lotteries Board (NLB) since {archiveFrom('NLB')} and the Development Lotteries Board (DLB) since{' '}
+          {archiveFrom('DLB')}. Each lottery page shows the latest result, every past draw, the jackpot wins we know of and number
+          statistics.
+        </p>
+        <div className="board-lists">
+          {(['NLB', 'DLB'] as const).map((board) => (
+            <div key={board}>
+              <h3>
+                {BOARD_NAME[board]} ({board})
+              </h3>
+              <ul>
+                {lotteries
+                  .filter((l) => l.board === board)
+                  .map((l) => (
+                    <li key={l.id}>
+                      <Link href={`/l/${l.id}`}>{l.name} results</Link>
+                      {l.lastDraw ? (
+                        <span className="muted small">
+                          {' '}
+                          · draw {l.lastDraw.drawNo}, {fmtDate(l.lastDraw.date)}
+                        </span>
+                      ) : null}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <p className="small muted">
+          WinLot is independent and not affiliated with either board. Always check a ticket against the official result before
+          claiming a prize.
+        </p>
+      </section>
+
       <Disclaimer />
+      <JsonLd data={homeJsonLd(lotteries, HOME_DESCRIPTION)} />
     </div>
   )
 }

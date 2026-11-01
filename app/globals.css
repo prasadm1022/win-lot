@@ -2125,6 +2125,93 @@ table.history td.num {
   }
 }
 
+/* ---------- Page intros and content blocks ---------- */
+.page-intro {
+  margin: 10px 0 0;
+  max-width: 72ch;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+.page-head > div:first-child {
+  flex: 1 1 520px;
+}
+
+/* "More Sri Lanka lottery results" on each lottery page */
+.related h2 {
+  font-size: 1.15rem;
+  margin-bottom: 12px;
+}
+.related-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px 24px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+}
+.related-list a {
+  font-weight: 600;
+}
+
+/* "Sri Lanka lottery results in one place" on the home page */
+.about-lotteries {
+  max-width: none; /* a full-width card like its neighbours; the text keeps a reading measure */
+}
+.about-lotteries p {
+  max-width: 80ch;
+}
+.about-lotteries h2 {
+  font-size: 1.3rem;
+}
+.board-lists {
+  display: grid;
+  gap: 8px 32px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  margin-bottom: 12px;
+}
+.board-lists h3 {
+  font-size: 0.95rem;
+  margin: 0 0 6px;
+}
+.board-lists ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
+
+/* Privacy: a compact head and two balanced columns of sections from 900 px */
+.policy-head .policy-date {
+  margin: 0;
+}
+.policy-grid .card {
+  padding: 20px 22px;
+  max-width: none;
+}
+.policy-grid .card h2 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+.policy-grid .card p:last-child {
+  margin-bottom: 0;
+}
+@media (min-width: 900px) {
+  .policy-grid {
+    column-count: 2;
+    column-gap: 18px;
+  }
+  .policy-grid > .card {
+    break-inside: avoid;
+    margin-bottom: 18px;
+  }
+}
+@media (max-width: 899px) {
+  .policy-grid {
+    display: grid;
+    gap: 14px;
+  }
+}
+
 /* ---------- Ads ---------- */
 /* Labelled ad spaces outside <main>, reserved at their final size so content never moves (no layout shift).
    A flat --bg-2 well with a hairline --ink-3 frame and square corners: visibly not a WinLot card, which is

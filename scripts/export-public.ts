@@ -4,8 +4,8 @@
 //   public/data/<id>.json        { lottery, draws, prediction, jackpots }  (prediction: v2, jackpots: JackpotStatus)
 //   public/data/<id>/draws.json  DrawSummary[] newest first (jackpot-won draws carry `jackpot`)
 //   public/data/lotteries.json   Lottery[]
-//   public/ads.txt               the AdSense authorised-sellers line; written only when a valid publisher ID is set
-//                                (NEXT_PUBLIC_ADSENSE_*, lib/ads.ts), removed otherwise
+//   public/ads.txt               the AdSense authorised-sellers line, always written: the NEXT_PUBLIC_ADSENSE_CLIENT
+//                                publisher ID when valid, else the owner's ADSENSE_PUBLISHER_ID (lib/ads.ts)
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -17,7 +17,7 @@ import {
   writePredictionsCache,
 } from "../lib/data";
 import { createRequire } from "node:module";
-import { adsSummary, adsTxtContent, getAdsConfig } from "../lib/ads";
+import { ADSENSE_PUBLISHER_ID, adsSummary, adsTxtContent, getAdsConfig } from "../lib/ads";
 
 // @next/env is CommonJS (Next's own .env loader, pinned with next): no ESM named exports.
 const { loadEnvConfig } = createRequire(import.meta.url)("@next/env") as typeof import("@next/env");
@@ -59,8 +59,8 @@ for (const lottery of lotteries) {
 }
 console.log(`export-public: wrote ${lotteries.length} lotteries to public/data/ and the predictions to .cache/`);
 
-// Ads: print the build-time configuration and write or remove public/ads.txt (copied to out/ads.txt by `next build`).
-// Without a valid publisher ID the file is removed, so a stale one never survives a rebuild.
+// Ads: print the build-time configuration and write public/ads.txt (copied to out/ads.txt by `next build`).
+// It is written even while ads are off, so Google can authorise the site before any slot exists.
 // Load the .env* files the way `next build` does (Next's own loader), so ads.txt and the pages agree on the IDs.
 loadEnvConfig(process.cwd());
 const ads = getAdsConfig();
@@ -69,7 +69,7 @@ for (const message of ads.warnings) {
   console.warn(message);
   if (process.env.GITHUB_ACTIONS === "true") console.log(`::warning title=ads::${message}`);
 }
-const adsTxt = adsTxtContent(ads.client);
+const adsTxt = adsTxtContent(ads.client ?? ADSENSE_PUBLISHER_ID);
 const adsTxtPath = join(process.cwd(), "public", "ads.txt");
 if (adsTxt) writeFileSync(adsTxtPath, adsTxt);
 else rmSync(adsTxtPath, { force: true });

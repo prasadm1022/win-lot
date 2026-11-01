@@ -74,8 +74,10 @@ never change the numbers or the suggestions. See the site's `/privacy` page for 
 cookies for ads.
 
 Ads are optional and configured at build time with the `NEXT_PUBLIC_ADSENSE_*` variables listed in
-[`.env.example`](.env.example). With no publisher ID set the build has no ads, no ad script and no
-`ads.txt`.
+[`.env.example`](.env.example). With no publisher ID set the build has no ads and no ad script. Every
+page still carries the `google-adsense-account` meta tag and the build always writes `ads.txt`, both
+with the owner's publisher ID (`ADSENSE_PUBLISHER_ID` in `lib/ads.ts`), so Google can verify the site
+before any ad slot exists.
 
 ---
 

@@ -13,6 +13,12 @@ export const ADS_ENV = {
 /** px; the CSS media query for the side rails uses the same literal (test-pinned). */
 export const RAIL_MIN_WIDTH = 1600;
 export const GOOGLE_CERT_AUTHORITY_ID = "f08c47fec0942fa0";
+/**
+ * The owner's AdSense publisher ID (public). It always goes into the `google-adsense-account` meta tag and ads.txt, so
+ * Google can verify the site and authorise its inventory before any ad slot exists; NEXT_PUBLIC_ADSENSE_CLIENT still
+ * decides whether the ad loader and slots render.
+ */
+export const ADSENSE_PUBLISHER_ID = "ca-pub-9686181545299385";
 
 export interface AdsConfig {
   client: string | null;

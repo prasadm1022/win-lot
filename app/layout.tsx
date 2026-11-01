@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { NavLinks } from '@/components/NavLinks'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { ADSENSE_PUBLISHER_ID } from '@/lib/ads'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -14,18 +15,20 @@ export const metadata: Metadata = {
   description:
     'Sri Lankan lottery results, statistics and statistical picks for NLB and DLB draws. For entertainment only; draws are random.',
   icons: { icon: '/favicon.svg' },
+  // AdSense site verification. Loads nothing; the ad script itself stays behind NEXT_PUBLIC_ADSENSE_CLIENT (AdFrame).
+  other: { 'google-adsense-account': ADSENSE_PUBLISHER_ID },
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   colorScheme: 'dark light',
-  themeColor: '#0b0a14',
+  themeColor: '#0b1120',
 }
 
 // Runs before first paint: apply the saved theme (or the system preference) to <html>
 // so neither the page nor the toggle icon flashes the wrong theme.
-const THEME_SCRIPT = `try{var t=localStorage.getItem('winlot-theme');if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}document.documentElement.dataset.theme=t;if(t==='light'){var m=document.querySelector('meta[name="theme-color"]');m&&m.setAttribute('content','#f7f3ea')}}catch(e){}`
+const THEME_SCRIPT = `try{var t=localStorage.getItem('winlot-theme');if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}document.documentElement.dataset.theme=t;if(t==='light'){var m=document.querySelector('meta[name="theme-color"]');m&&m.setAttribute('content','#ffffff')}}catch(e){}`
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -55,11 +58,34 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {children}
         <footer className="site-footer">
           <div className="container">
-            <span>Results are sourced from nlb.lk and dlb.lk. WinLot is independent and not affiliated with either board.</span>
-            <span>Draws are random. Play responsibly.</span>
-            <span>
-              <Link href="/privacy">Privacy</Link>
-            </span>
+            <div className="footer-top">
+              <div className="footer-brand">
+                <Link href="/" className="brand" aria-label="WinLot home">
+                  <span className="brand-mark" aria-hidden="true">
+                    W
+                  </span>
+                  WinLot
+                </Link>
+                <p>Results are sourced from nlb.lk and dlb.lk. WinLot is independent and not affiliated with either board.</p>
+              </div>
+              <ul className="footer-links">
+                <li>
+                  <Link href="/">All lotteries</Link>
+                </li>
+                <li>
+                  <Link href="/about">Method</Link>
+                </li>
+                <li>
+                  <Link href="/privacy">Privacy</Link>
+                </li>
+              </ul>
+            </div>
+            <div className="footer-bottom">
+              <span>Draws are random. Play responsibly.</span>
+              <span>
+                A <a href="https://hadesvault.com">Hades Vault</a> site
+              </span>
+            </div>
           </div>
         </footer>
       </body>

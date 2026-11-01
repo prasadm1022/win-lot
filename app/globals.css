@@ -1,33 +1,41 @@
 /* SPDX-License-Identifier: Apache-2.0 */
-/* Design tokens. Dark is the default ("lucky draw" night); light is a warm parchment. */
+/* Design tokens. A neutral slate system with one emerald accent; gold belongs to the balls and jackpots only.
+   Dark is the default before the theme script runs; the script follows the visitor's choice or system setting. */
 :root {
   color-scheme: dark;
 
   /* Surfaces */
-  --bg: #0b0a14;
-  --bg-2: #120f20;
-  --surface: #171329;
-  --surface-2: #1f1a36;
-  --surface-3: #2a2347;
-  --border: rgba(255, 255, 255, 0.09);
-  --border-strong: rgba(255, 255, 255, 0.18);
+  --bg: #0b1120;
+  --bg-2: #0f172a;
+  --surface: #111a2e;
+  --surface-2: #172238;
+  --surface-3: #1f2c46;
+  --border: rgba(148, 163, 184, 0.16);
+  --border-strong: rgba(148, 163, 184, 0.3);
 
   /* Ink */
-  --ink: #f5f0e6;
-  --ink-2: #c9c2b4;
-  --ink-3: #978f80;
-  --ink-inverse: #1a1206;
+  --ink: #f1f5f9;
+  --ink-2: #cbd5e1;
+  --ink-3: #94a3b8;
+  --ink-inverse: #0b1120;
 
-  /* Gold + jewels */
+  /* Accent: links, actions, active states, eyebrows */
+  --accent: #34d399;
+  --accent-strong: #10b981;
+  --accent-ink: #6ee7b7; /* text-grade accent on dark */
+  --on-accent: #052e22; /* ink on solid accent fills */
+  --accent-soft: rgba(52, 211, 153, 0.12);
+
+  /* Gold + jewels (balls, jackpots, data series) */
   --gold: #e2b23c;
   --gold-2: #f3d27a;
   --gold-3: #a27a1d;
-  --gold-ink: #ffd86b; /* text-grade gold on dark */
+  --gold-ink: var(--accent-ink); /* text accents follow the brand accent, not the balls */
   --on-gold: #1a1206; /* ink on solid gold fills */
-  --ruby: #ff6b8a;
-  --emerald: #3ddc97;
-  --sapphire: #6aa7ff;
-  --amethyst: #b48bff;
+  --ruby: #fb7185;
+  --emerald: #34d399;
+  --sapphire: #60a5fa;
+  --amethyst: #a78bfa;
 
   /* Status (reserved, never used as series colors) */
   --ok: #3ddc97;
@@ -43,7 +51,7 @@
   --viz-hot: #ff6b8a;
   --viz-cold: #6aa7ff;
   --viz-overdue: #b48bff;
-  --viz-seq-0: #2a2347; /* sequential ramp: gold, dark -> bright */
+  --viz-seq-0: #1f2c46; /* sequential ramp: gold, dark -> bright */
   --viz-seq-1: #4a3a2a;
   --viz-seq-2: #7a5a1f;
   --viz-seq-3: #b08422;
@@ -61,60 +69,68 @@
   --ball-shadow: 0 6px 14px rgba(0, 0, 0, 0.45), inset 0 -3px 6px rgba(0, 0, 0, 0.25);
 
   /* Type */
-  --font-display: 'Palatino Linotype', Palatino, 'Book Antiqua', 'Iowan Old Style', Georgia, 'Noto Serif Sinhala', serif;
-  --font-body: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', 'Noto Sans Sinhala', 'Noto Sans Tamil', sans-serif;
+  --font-body: Inter, 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue',
+    'Noto Sans Sinhala', 'Noto Sans Tamil', sans-serif;
+  --font-display: Inter, 'Segoe UI Variable Display', 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue',
+    'Noto Sans Sinhala', sans-serif;
   --font-mono: ui-monospace, 'Cascadia Mono', Consolas, Menlo, monospace;
 
   /* Scale */
-  --radius: 14px;
+  --radius: 12px;
   --radius-sm: 8px;
-  --radius-lg: 22px;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  --shadow-glow: 0 0 0 1px rgba(226, 178, 60, 0.25), 0 12px 40px rgba(226, 178, 60, 0.12);
+  --radius-lg: 16px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0 0 0 1px var(--accent-soft), 0 6px 20px rgba(0, 0, 0, 0.3);
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --focus: 0 0 0 3px var(--bg), 0 0 0 6px var(--gold);
+  --focus: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
   --max-w: 1180px;
   --gutter: clamp(16px, 4vw, 40px);
 }
 
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: #f7f3ea;
-  --bg-2: #f0e9db;
-  --surface: #fffdf8;
-  --surface-2: #f5efe2;
-  --surface-3: #eadfc8;
-  --border: rgba(60, 40, 10, 0.12);
-  --border-strong: rgba(60, 40, 10, 0.25);
+  --bg: #f6f7f9;
+  --bg-2: #eef1f5;
+  --surface: #ffffff;
+  --surface-2: #f3f5f8;
+  --surface-3: #e5e9f0;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
 
-  --ink: #1d1708;
-  --ink-2: #4b4330;
-  --ink-3: #6f6756;
-  --ink-inverse: #fff9ea;
+  --ink: #0f172a;
+  --ink-2: #334155;
+  --ink-3: #5b6678;
+  --ink-inverse: #ffffff;
+
+  --accent: #047857;
+  --accent-strong: #065f46;
+  --accent-ink: #047857;
+  --on-accent: #ffffff;
+  --accent-soft: rgba(4, 120, 87, 0.08);
 
   --gold: #b8860b;
   --gold-2: #d9a62a;
   --gold-3: #7a5a0d;
-  --gold-ink: #7a5a0d;
+  --gold-ink: var(--accent-ink);
   --on-gold: #1d1708;
-  --ruby: #c8244a;
-  --emerald: #0f8a5c;
-  --sapphire: #1e62c4;
-  --amethyst: #6b3fc9;
+  --ruby: #be123c;
+  --emerald: #047857;
+  --sapphire: #1d4ed8;
+  --amethyst: #6d28d9;
 
   --ok: #0f8a5c;
   --warn: #9a5b00;
   --bad: #c62828;
 
   --viz-surface: var(--surface);
-  --viz-grid: rgba(60, 40, 10, 0.1);
+  --viz-grid: rgba(15, 23, 42, 0.08);
   --viz-axis: var(--ink-3);
   --viz-series-1: #b8860b;
   --viz-series-2: #1e62c4;
   --viz-hot: #c8244a;
   --viz-cold: #1e62c4;
   --viz-overdue: #6b3fc9;
-  --viz-seq-0: #f5efe2;
+  --viz-seq-0: #f3f5f8;
   --viz-seq-1: #f1dfae;
   --viz-seq-2: #e3c06a;
   --viz-seq-3: #c9961f;
@@ -123,10 +139,10 @@
   --seq-ink-3: var(--ink);
   --seq-ink-hi: var(--ink-inverse);
 
-  --ball-shadow: 0 6px 14px rgba(60, 40, 10, 0.25), inset 0 -3px 6px rgba(0, 0, 0, 0.18);
-  --shadow: 0 10px 30px rgba(60, 40, 10, 0.12);
-  --shadow-glow: 0 0 0 1px rgba(184, 134, 11, 0.3), 0 12px 40px rgba(184, 134, 11, 0.15);
-  --focus: 0 0 0 3px var(--bg), 0 0 0 6px var(--gold);
+  --ball-shadow: 0 2px 6px rgba(15, 23, 42, 0.18), inset 0 -3px 6px rgba(0, 0, 0, 0.16);
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.06);
+  --shadow-glow: 0 0 0 1px var(--accent-soft), 0 6px 18px rgba(15, 23, 42, 0.08);
+  --focus: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
 }
 
 
@@ -147,19 +163,12 @@ body {
   font-size: 16px;
   line-height: 1.5;
   color: var(--ink);
-  background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(226, 178, 60, 0.14), transparent 60%),
-    radial-gradient(900px 500px at -10% 30%, rgba(106, 167, 255, 0.1), transparent 60%),
-    var(--bg);
+  background: var(--bg);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   -webkit-font-smoothing: antialiased;
-}
-
-:root[data-theme='light'] body {
-  background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(184, 134, 11, 0.14), transparent 60%),
-    radial-gradient(900px 500px at -10% 30%, rgba(30, 98, 196, 0.07), transparent 60%),
-    var(--bg);
+  font-feature-settings: 'cv11', 'ss01';
 }
 
 h1,
@@ -167,28 +176,33 @@ h2,
 h3,
 h4 {
   font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: 0.005em;
-  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   margin: 0 0 0.4em;
   color: var(--ink);
 }
 h1 {
-  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-size: clamp(1.9rem, 4vw, 2.75rem);
+  letter-spacing: -0.03em;
 }
 h2 {
-  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-size: clamp(1.3rem, 2.4vw, 1.6rem);
 }
 h3 {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
 }
 p {
   margin: 0 0 1em;
 }
 a {
-  color: var(--gold-ink);
+  color: var(--accent-ink);
   text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration-thickness: 2px;
 }
 button {
   font: inherit;
@@ -216,8 +230,8 @@ button {
   top: -48px;
   z-index: 100;
   padding: 10px 14px;
-  background: var(--gold);
-  color: var(--on-gold);
+  background: var(--accent);
+  color: var(--on-accent);
   border-radius: var(--radius-sm);
   font-weight: 600;
 }
@@ -235,16 +249,16 @@ button {
   position: sticky;
   top: 0;
   z-index: 50;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
   border-bottom: 1px solid var(--border);
 }
 .site-header .container {
   display: flex;
   align-items: center;
   gap: 16px;
-  min-height: 64px;
+  min-height: 60px;
 }
 .brand {
   display: inline-flex;
@@ -253,57 +267,62 @@ button {
   text-decoration: none;
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 .brand-mark {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--ball-face);
-  box-shadow: var(--ball-shadow);
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--accent);
   display: grid;
   place-items: center;
-  color: var(--ball-ink);
-  font-size: 0.95rem;
+  color: var(--on-accent);
+  font-size: 0.9rem;
   font-weight: 800;
+  letter-spacing: 0;
 }
 .brand-tag {
   font-family: var(--font-body);
   font-size: 0.7rem;
   color: var(--ink-3);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   margin-left: 2px;
-  font-weight: 500;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-weight: 600;
 }
 .site-nav {
   margin-left: auto;
   display: flex;
-  gap: 4px;
+  gap: 2px;
   align-items: center;
 }
 .site-nav a {
   text-decoration: none;
   color: var(--ink-2);
   padding: 8px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
 }
 .site-nav a:hover {
   color: var(--ink);
   background: var(--surface-2);
 }
 .site-nav a[aria-current='page'] {
-  color: var(--gold-ink);
-  background: color-mix(in srgb, var(--gold) 14%, transparent);
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  font-weight: 600;
 }
 .icon-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  margin-left: 6px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--surface);
   display: inline-grid;
@@ -317,21 +336,70 @@ button {
 }
 
 main {
-  padding-block: 28px 56px;
+  padding-block: 32px 64px;
+  flex: 1 0 auto;
 }
 
 /* ---------- Footer ---------- */
 .site-footer {
   border-top: 1px solid var(--border);
-  padding: 28px 0 40px;
+  background: var(--surface);
+  padding: 32px 0 36px;
   color: var(--ink-3);
   font-size: 0.85rem;
 }
 .site-footer .container {
+  display: grid;
+  gap: 20px;
+}
+.footer-top {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 28px;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 16px 40px;
+}
+.footer-brand {
+  display: grid;
+  gap: 8px;
+  max-width: 52ch;
+}
+.footer-brand .brand {
+  font-size: 1.05rem;
+}
+.footer-brand .brand-mark {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+.footer-brand p {
+  margin: 0;
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.footer-links a {
+  color: var(--ink-2);
+  text-decoration: none;
+  font-weight: 500;
+}
+.footer-links a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+.footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
 }
 
 /* ---------- Generic blocks ---------- */
@@ -339,7 +407,7 @@ main {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 24px;
   box-shadow: var(--shadow);
 }
 .card-head {
@@ -360,12 +428,12 @@ main {
   margin: 0;
 }
 .eyebrow {
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gold-ink);
-  font-weight: 600;
-  margin: 0 0 6px;
+  color: var(--accent-ink);
+  font-weight: 700;
+  margin: 0 0 8px;
 }
 .muted {
   color: var(--ink-3);
@@ -401,25 +469,25 @@ main {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   border: 1px solid var(--border-strong);
   color: var(--ink-2);
   background: var(--surface-2);
 }
 .badge-nlb {
-  color: var(--gold-ink);
-  border-color: color-mix(in srgb, var(--gold) 50%, transparent);
-  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  color: var(--accent-ink);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: var(--accent-soft);
 }
 .badge-dlb {
   color: var(--sapphire);
-  border-color: color-mix(in srgb, var(--sapphire) 50%, transparent);
-  background: color-mix(in srgb, var(--sapphire) 12%, transparent);
+  border-color: color-mix(in srgb, var(--sapphire) 40%, transparent);
+  background: color-mix(in srgb, var(--sapphire) 9%, transparent);
 }
 
 .btn {
@@ -427,27 +495,27 @@ main {
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border-strong);
-  background: var(--surface-2);
+  background: var(--surface);
   color: var(--ink);
   font-weight: 600;
+  font-size: 0.95rem;
   text-decoration: none;
   cursor: pointer;
-  transition: transform 0.15s var(--ease), background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
 .btn:hover {
-  background: var(--surface-3);
-  transform: translateY(-1px);
+  background: var(--surface-2);
 }
 .btn-primary {
-  background: linear-gradient(135deg, var(--gold-2), var(--gold) 60%, var(--gold-3));
-  color: var(--on-gold);
-  border-color: transparent;
-  box-shadow: var(--shadow-glow);
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
 }
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--gold-2), var(--gold) 70%, var(--gold-3));
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
 }
 .btn:disabled {
   opacity: 0.5;
@@ -459,7 +527,7 @@ main {
 .segmented {
   display: inline-flex;
   padding: 3px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--surface-2);
   border: 1px solid var(--border);
   gap: 2px;
@@ -468,15 +536,16 @@ main {
   border: 0;
   background: transparent;
   padding: 6px 14px;
-  border-radius: 999px;
+  border-radius: 6px;
   cursor: pointer;
   color: var(--ink-2);
   font-weight: 600;
   font-size: 0.85rem;
 }
 .segmented button[aria-pressed='true'] {
-  background: var(--gold);
-  color: var(--on-gold);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12), 0 0 0 1px var(--border);
 }
 
 /* ---------- Balls ---------- */
@@ -682,37 +751,32 @@ main {
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-lg);
-  padding: clamp(28px, 5vw, 56px) clamp(20px, 5vw, 56px);
-  background:
-    radial-gradient(800px 400px at 10% 0%, rgba(226, 178, 60, 0.22), transparent 60%),
-    radial-gradient(600px 300px at 100% 100%, rgba(180, 139, 255, 0.18), transparent 60%),
-    linear-gradient(160deg, var(--surface-2), var(--surface));
+  padding: clamp(24px, 4.5vw, 48px);
+  background: var(--surface);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   display: grid;
   grid-template-columns: 1.15fr 1fr;
-  gap: 32px;
+  gap: 40px;
   align-items: center;
 }
 .hero::before {
-  /* fine gold rule pattern */
+  /* one quiet accent rule along the top edge */
   content: '';
   position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    135deg,
-    rgba(226, 178, 60, 0.05) 0 1px,
-    transparent 1px 18px
-  );
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 20%, transparent));
   pointer-events: none;
 }
 .hero > * {
   position: relative;
 }
 .hero-lede {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
   color: var(--ink-2);
-  max-width: 48ch;
+  max-width: 54ch;
 }
 .hero-actions {
   display: flex;
@@ -730,10 +794,9 @@ main {
   width: min(100%, 300px);
   aspect-ratio: 1;
   border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--gold) 55%, transparent);
-  box-shadow:
-    inset 0 0 60px rgba(226, 178, 60, 0.12),
-    0 0 0 10px color-mix(in srgb, var(--gold) 8%, transparent);
+  border: 1px solid var(--border-strong);
+  background: radial-gradient(circle, var(--surface-2) 0%, var(--surface) 70%);
+  box-shadow: 0 0 0 10px var(--surface-2);
   display: grid;
   place-items: center;
 }
@@ -741,7 +804,7 @@ main {
   position: absolute;
   inset: -2px;
   border-radius: 50%;
-  border: 2px dashed color-mix(in srgb, var(--gold) 50%, transparent);
+  border: 1px dashed var(--border-strong);
   animation: drum-spin 24s linear infinite;
 }
 .hero-drum .orbit {
@@ -806,8 +869,8 @@ main {
   box-sizing: border-box;
 }
 .hero-dots button[aria-pressed='true']::before {
-  background: var(--gold);
-  border-color: var(--gold);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 .hero-ctl {
   display: inline-flex;
@@ -815,7 +878,7 @@ main {
   gap: 6px;
   min-height: 24px;
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: 6px;
   border: 1px solid var(--border-strong);
   background: transparent;
   color: var(--ink-2);
@@ -855,8 +918,9 @@ main {
 .countdown .unit b {
   font-family: var(--font-display);
   font-size: 1.3rem;
+  font-weight: 700;
   line-height: 1.1;
-  color: var(--gold-ink);
+  color: var(--ink);
 }
 .countdown .unit span {
   font-size: 0.65rem;
@@ -874,24 +938,30 @@ main {
 .lottery-grid {
   display: grid;
   gap: 18px;
+  /* 330 px keeps a full ticket (letter, numbers, bonus) on one line */
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
 }
 .lottery-card {
-  --tint: hsl(var(--hue) 70% 55% / 0.14);
   position: relative;
   display: grid;
   gap: 14px;
   text-decoration: none;
   color: inherit;
-  background:
-    radial-gradient(400px 160px at 100% 0%, var(--tint), transparent 70%),
-    var(--surface);
-  transition: transform 0.2s var(--ease), box-shadow 0.2s, border-color 0.2s;
+  overflow: hidden;
+  background: var(--surface);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.lottery-card::before {
+  /* the lottery's own hue as a thin top rule: tells the seven apart without tinting the card */
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: hsl(var(--hue) 65% 50%);
 }
 .lottery-card:hover,
 .lottery-card:focus-within {
-  transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--gold) 45%, var(--border));
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
   box-shadow: var(--shadow-glow);
 }
 .lottery-card .title-row {
@@ -913,7 +983,8 @@ main {
 }
 .lottery-card .row-label {
   font-size: 0.7rem;
-  letter-spacing: 0.12em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-3);
   margin: 0 0 6px;
@@ -982,6 +1053,8 @@ main {
 .stat .value {
   font-family: var(--font-display);
   font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   margin: 2px 0 0;
   font-variant-numeric: tabular-nums;
 }
@@ -1015,8 +1088,8 @@ main {
   border: 1px solid var(--border);
 }
 .pick-card.lead {
-  border-color: color-mix(in srgb, var(--gold) 55%, transparent);
-  background: color-mix(in srgb, var(--gold) 9%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
 }
 .pick-card.lead .pick-why,
 .pick-card.lead .pick-note,
@@ -1763,8 +1836,8 @@ details.maths > summary:focus-visible {
 .bt-pooled {
   padding: 10px 12px;
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--gold) 7%, var(--surface-2));
-  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
 }
 .bt-headline {
   margin: 0;
@@ -1961,9 +2034,12 @@ table.history td.num {
 @media (max-width: 900px) {
   .hero {
     grid-template-columns: 1fr;
+    gap: 28px;
   }
+  /* The headline and lede lead on narrow screens; the featured pick follows them. */
   .hero-visual {
-    order: -1;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
   }
   .hero-drum {
     width: min(100%, 240px);
@@ -1984,6 +2060,10 @@ table.history td.num {
     font-size: 0.88rem;
   }
   .brand-tag {
+    display: none;
+  }
+  /* the drum is decoration; on a phone the featured pick's own balls say it */
+  .hero-drum {
     display: none;
   }
   .card {
@@ -2057,15 +2137,16 @@ table.history td.num {
 
 /* ---------- Ads ---------- */
 /* Labelled ad spaces outside <main>, reserved at their final size so content never moves (no layout shift).
-   Dashed --ink-3 outline, --bg-2 fill and square corners: visibly not a WinLot card. Never pinned to the viewport. */
+   A flat --bg-2 well with a hairline --ink-3 frame and square corners: visibly not a WinLot card, which is
+   white/raised with rounded corners. Never pinned to the viewport. */
 .ad {
   margin-inline: auto;
 }
 .ad-top {
-  margin-top: 16px;
+  margin-top: 20px;
 }
 .ad-bottom {
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 .ad-banner {
   width: min(100% - 2 * var(--gutter), var(--max-w));
@@ -2073,19 +2154,20 @@ table.history td.num {
 }
 .ad-label {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
+  font-weight: 600;
   line-height: 14px;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   color: var(--ink-3);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-align: center;
 }
 .ad-box {
   overflow: hidden;
   background: var(--bg-2);
-  outline: 1px dashed var(--ink-3);
-  outline-offset: 1px;
+  outline: 1px solid color-mix(in srgb, var(--ink-3) 55%, transparent);
+  outline-offset: 0;
   border-radius: 0;
   margin-inline: auto;
 }
@@ -2111,27 +2193,36 @@ table.history td.num {
 .ad-rail {
   display: none;
 }
+/* From 1600 px the shell is a centred three-column grid: rail | content | rail. The rails sit beside the
+   content column, aligned with its first card, instead of floating out at the window edges. */
 @media (min-width: 1600px) {
-  .site-shell {
-    position: relative;
-  }
   .site-shell.has-rails {
+    display: grid;
+    grid-template-columns: 160px minmax(0, var(--max-w)) 160px;
+    grid-template-areas: 'left main right';
+    justify-content: center;
+    column-gap: 40px;
     min-height: 680px;
+  }
+  .site-shell.has-rails > main {
+    grid-area: main;
+  }
+  .site-shell.has-rails > main > .container {
+    width: 100%;
   }
   .ad-rail {
     display: block;
-    position: absolute;
-    top: 28px;
     width: 160px;
+    padding-top: 32px;
   }
   .ad-rail .ad-box {
     width: 160px;
     height: 600px;
   }
   .ad-left {
-    right: calc(50% + var(--max-w) / 2 + 24px);
+    grid-area: left;
   }
   .ad-right {
-    left: calc(50% + var(--max-w) / 2 + 24px);
+    grid-area: right;
   }
 }

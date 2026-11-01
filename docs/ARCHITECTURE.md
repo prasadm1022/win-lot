@@ -45,7 +45,7 @@ Cloudflare static assets serve out/  (/l/govisetha -> l/govisetha.html, unknown 
 - Routes (UI): the content pages live in the route group `app/(site)/` (`/` home, `/l/[id]` detail
   (`generateStaticParams` over `LOTTERY_IDS`), `/about`, `/privacy`), whose layout wraps them in `AdFrame`; the 404
   page (`app/not-found.tsx`) stays outside the group, so it carries no loader and no ad space. `/ads.txt` is the file
-  the prebuild generates (absent when ads are off, so Cloudflare answers 404).
+  the prebuild generates (always present: the configured client, else `ADSENSE_PUBLISHER_ID`).
   Rule: the root layout renders no `<main>`; `app/(site)/layout.tsx` (through `AdFrame`) and `app/not-found.tsx` each
   render their own `<main id="main" tabIndex={-1}>`. Any future page outside `app/(site)/` must render its own
   `<main id="main">` too: it is the skip-link target.
@@ -235,9 +235,12 @@ no `main`, no bindings, no crons). Alternative: Cloudflare Pages with build outp
 
 Google AdSense is a build-time setting: the five build variables `NEXT_PUBLIC_ADSENSE_CLIENT` (`ca-pub-<digits>`) and
 `NEXT_PUBLIC_ADSENSE_SLOT_TOP` / `_LEFT` / `_RIGHT` / `_BOTTOM` (digits) are set in Cloudflare Workers Builds (see
-`.env.example`; public IDs, not secrets). Unset or invalid client = ads fully off: no script, no ad space, no gap, no
-`ads.txt`. A set client renders the loader on every content page; each set slot adds its labelled space. The prebuild
-prints `ads: off (...)` or `ads: on (...)` plus any `WARNING ads:` line and writes `public/ads.txt`
-(`google.com, pub-<digits>, DIRECT, f08c47fec0942fa0`) or removes it; `next build` copies it to `out/ads.txt`.
+`.env.example`; public IDs, not secrets). Unset or invalid client = ads off: no script, no ad space, no gap. A set
+client renders the loader on every content page; each set slot adds its labelled space. Independently of that, every
+page carries `<meta name="google-adsense-account">` with `ADSENSE_PUBLISHER_ID` (`lib/ads.ts`) for site verification,
+and the prebuild always writes `public/ads.txt` (`google.com, pub-<digits>, DIRECT, f08c47fec0942fa0`) for the
+configured client, else that ID; it prints `ads: off (...)` or `ads: on (...)` plus any `WARNING ads:` line, and
+`next build` copies the file to `out/ads.txt`. hadesvault.com's own `/ads.txt` lists this site with
+`subdomain=winlot.hadesvault.com`.
 Consent for EEA/UK/CH visitors, Auto ads (off) and blocked ad categories are AdSense account settings of the owner.
 Free-plan limits: see README.

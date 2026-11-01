@@ -5,7 +5,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { adsLoaderSrc, adsTxtContent, parseAdsConfig, type AdPosition } from "../lib/ads";
+import { ADSENSE_PUBLISHER_ID, adsLoaderSrc, adsTxtContent, parseAdsConfig, type AdPosition } from "../lib/ads";
 import { DISCLAIMER_TEXT } from "../components/Notices";
 
 const ROOT = join(__dirname, "..");
@@ -110,14 +110,16 @@ describe.skipIf(!run)("built pages follow the ads configuration (AC-1..AC-9, AC-
     expect((h.match(/<main\b/g) ?? []).length).toBe(1);
   });
 
-  it("ads.txt exists only when the client is valid and holds the one exact line (AC-25, AC-26)", () => {
-    const f = join(OUT, "ads.txt");
-    const want = adsTxtContent(cfg.client);
-    if (want === null) expect(existsSync(f)).toBe(false);
-    else {
-      expect(readFileSync(f, "utf8")).toBe(want);
-      expect(want).toMatch(/^google\.com, pub-\d+, DIRECT, f08c47fec0942fa0\n$/);
-      expect(want).not.toContain("ca-");
+  it("ads.txt always holds the one exact line, for the configured client or the owner's publisher ID (AC-25)", () => {
+    const want = adsTxtContent(cfg.client ?? ADSENSE_PUBLISHER_ID);
+    expect(readFileSync(join(OUT, "ads.txt"), "utf8")).toBe(want);
+    expect(want).toMatch(/^google\.com, pub-\d+, DIRECT, f08c47fec0942fa0\n$/);
+    expect(want).not.toContain("ca-");
+  });
+
+  it("every page carries the google-adsense-account meta tag, ads on or off", () => {
+    for (const p of [...contentPages(), "404.html"]) {
+      expect(html(p), p).toContain(`<meta name="google-adsense-account" content="${ADSENSE_PUBLISHER_ID}"/>`);
     }
   });
 

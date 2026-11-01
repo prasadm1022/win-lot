@@ -608,14 +608,17 @@ describe("privacy page, footer and 404", () => {
     expect(html).toContain('href="https://adssettings.google.com"');
     expect(html).toContain('href="https://policies.google.com/technologies/partner-sites"');
     expect(html.match(/rel="noopener noreferrer"/g)).toHaveLength(2);
+    expect(html).toContain('href="https://hadesvault.com/privacy"');
+    expect(html).toContain('href="https://hadesvault.com/contact"');
+    expect(t).toContain("Every site on hadesvault.com uses the same Google AdSense account.");
     expect(t).toContain("WinLot has no accounts, no sign-up and no forms.");
     expect(t).toContain("European Economic Area");
     expect(t).toContain('Every ad space is marked "Advertisement"');
     expect(t).toContain(`Last updated ${fmtDate(PRIVACY_UPDATED)}.`);
     expect(html.match(/<h1/g)).toHaveLength(1);
-    expect(html.match(/<h2/g)).toHaveLength(5);
+    expect(html.match(/<h2/g)).toHaveLength(6);
     expect(html).not.toMatch(/<h[3-6]/);
-    for (const id of ["pp-what", "pp-ads", "pp-choices", "pp-eea", "pp-changes"]) {
+    for (const id of ["pp-who", "pp-what", "pp-ads", "pp-choices", "pp-eea", "pp-changes"]) {
       expect(html).toContain(`<section class="card prose" aria-labelledby="${id}"><h2 id="${id}">`);
     }
     expect(html).not.toContain("adsbygoogle");

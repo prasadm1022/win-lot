@@ -3,11 +3,12 @@ import type { Metadata } from 'next'
 import { fmtDate } from '@/components/util/format'
 
 /** Date of the latest version of this policy (ISO); shown as "Last updated ..." at the end of the page. */
-export const PRIVACY_UPDATED = '2026-10-31'
+export const PRIVACY_UPDATED = '2026-11-01'
 
 export const metadata: Metadata = {
   title: 'Privacy',
-  description: 'What WinLot stores on your device, how Google ads use cookies when ads are on, and how to change your choices.',
+  description:
+    'What WinLot stores on your device, who runs it, how Google ads use cookies across hadesvault.com, and how to change your choices.',
 }
 
 export default function PrivacyPage() {
@@ -21,6 +22,18 @@ export default function PrivacyPage() {
           and what Google&apos;s ads do when they are on.
         </p>
       </header>
+
+      <section className="card prose" aria-labelledby="pp-who">
+        <h2 id="pp-who">Who runs WinLot</h2>
+        <p>
+          WinLot is run by Hades Vault, a software studio in Sri Lanka, and lives at winlot.hadesvault.com. It is one of the sites
+          Hades Vault hosts under hadesvault.com, and all of them follow the same rules for ads and cookies. The{' '}
+          <a href="https://hadesvault.com/privacy">Hades Vault privacy policy</a> covers the rest of hadesvault.com.
+        </p>
+        <p>
+          For questions about this policy, use the <a href="https://hadesvault.com/contact">Hades Vault contact page</a>.
+        </p>
+      </section>
 
       <section className="card prose" aria-labelledby="pp-what">
         <h2 id="pp-what">What WinLot stores</h2>
@@ -37,6 +50,10 @@ export default function PrivacyPage() {
           WinLot may show clearly labelled advertisements served by Google AdSense. When ads are on, Google and its partners use
           cookies or similar identifiers to show and measure ads. The ads you see may be personalised from your visits to this and
           other websites.
+        </p>
+        <p>
+          Every site on hadesvault.com uses the same Google AdSense account. Google may keep its ad cookies for the whole
+          hadesvault.com domain, so a cookie or ad choice set on one of these sites can also apply on the others.
         </p>
         <p>
           When ads are off, no ad code loads and none of this applies. Every ad space is marked &quot;Advertisement&quot; so you can
@@ -74,7 +91,7 @@ export default function PrivacyPage() {
 
       <section className="card prose" aria-labelledby="pp-changes">
         <h2 id="pp-changes">Changes to this policy</h2>
-        <p>This page changes when WinLot&apos;s use of ads or storage changes. The date below shows the latest version.</p>
+        <p>This page changes when WinLot&apos;s or Hades Vault&apos;s use of ads or storage changes. The date below shows the latest version.</p>
       </section>
 
       <p className="small muted">Last updated {fmtDate(PRIVACY_UPDATED)}.</p>

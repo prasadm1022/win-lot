@@ -138,7 +138,8 @@ describe.skipIf(!run)("built pages follow the ads configuration (AC-1..AC-9, AC-
       "United Kingdom",
       "Switzerland",
       "Privacy and cookie settings",
-      "Last updated 31 Oct 2026",
+      "hadesvault.com",
+      "Last updated 1 Nov 2026",
     ]) {
       expect(text.toLowerCase(), s).toContain(s.toLowerCase());
     }

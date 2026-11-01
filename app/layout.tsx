@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { NavLinks } from '@/components/NavLinks'
+import { LogoMark } from '@/components/LogoMark'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { ADSENSE_PUBLISHER_ID } from '@/lib/ads'
 import './globals.css'
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
   },
   description:
     'Sri Lankan lottery results, statistics and statistical picks for NLB and DLB draws. For entertainment only; draws are random.',
-  icons: { icon: '/favicon.svg' },
+  icons: { icon: '/favicon.svg', apple: '/apple-icon.png' },
   // WinLot is a project by HadesVault.com
   authors: [{ name: 'HadesVault.com', url: 'https://hadesvault.com' }],
   creator: 'HadesVault.com',
@@ -47,9 +48,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <header className="site-header">
           <div className="container">
             <Link href="/" className="brand" aria-label="WinLot home">
-              <span className="brand-mark" aria-hidden="true">
-                W
-              </span>
+              <LogoMark className="brand-mark" size={32} />
               WinLot
               <span className="brand-tag">Sri Lanka</span>
             </Link>
@@ -65,9 +64,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <div className="footer-top">
               <div className="footer-brand">
                 <Link href="/" className="brand" aria-label="WinLot home">
-                  <span className="brand-mark" aria-hidden="true">
-                    W
-                  </span>
+                  <LogoMark className="brand-mark" size={26} />
                   WinLot
                 </Link>
                 <p>Results are sourced from nlb.lk and dlb.lk. WinLot is independent and not affiliated with either board.</p>

@@ -7,6 +7,8 @@ const LINKS = [
   // "Home" hides on narrow phones (CSS .nav-home): the logo beside it already links home
   { href: '/', label: 'Home', className: 'nav-home' },
   { href: '/about', label: 'How it works' },
+  { href: '/about-us', label: 'About us' },
+  { href: '/contact', label: 'Contact' },
   { href: '/privacy', label: 'Privacy' },
 ]
 

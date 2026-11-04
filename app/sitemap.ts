@@ -23,6 +23,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ...(l.lastDraw ? { lastModified: l.lastDraw.date } : {}),
     })),
     { url: absUrl('/about') },
+    { url: absUrl('/about-us') },
+    { url: absUrl('/contact') },
     { url: absUrl('/privacy') },
   ]
 }

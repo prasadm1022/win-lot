@@ -7,6 +7,8 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { ADSENSE_PUBLISHER_ID, adsLoaderSrc, adsTxtContent, parseAdsConfig, type AdPosition } from "../lib/ads";
 import { DISCLAIMER_TEXT } from "../components/Notices";
+import { fmtDate } from "../components/util/format";
+import { PRIVACY_UPDATED } from "../app/(site)/privacy/page";
 
 const ROOT = join(__dirname, "..");
 const OUT = join(ROOT, "out");
@@ -35,14 +37,15 @@ const walk = (dir: string, acc: string[] = []): string[] => {
   return acc;
 };
 const rel = (p: string) => p.slice(OUT.length + 1).replace(/\\/g, "/");
-const contentPages = (): string[] => ["index.html", "about.html", "privacy.html", ...LOTTERY_IDS.map((id) => `l/${id}.html`)];
+/** Pages under app/(site)/, the ones AdFrame wraps; contact.html and 404.html live outside the group and get no ads. */
+const contentPages = (): string[] => ["index.html", "about.html", "about-us.html", "privacy.html", ...LOTTERY_IDS.map((id) => `l/${id}.html`)];
 const positionsIn = (h: string): string[] => [...h.matchAll(/<aside\b[^>]*class="ad ad-(top|left|right|bottom)\b/g)].map((m) => m[1]);
 const loaders = (h: string): number => (h.match(/<script[^>]*adsbygoogle\.js/g) ?? []).length;
 
 describe.skipIf(!run)("built pages follow the ads configuration (AC-1..AC-9, AC-22..AC-28)", () => {
-  it("every content page (home, 7 lotteries, about, privacy) and the 404 page is built", () => {
+  it("every content page (home, 7 lotteries, about, about-us, privacy), the contact page and the 404 page is built", () => {
     expect(existsSync(join(OUT, "index.html")), "out/index.html is missing: run `npm run build` first").toBe(true);
-    for (const p of [...contentPages(), "404.html"]) expect(existsSync(join(OUT, p)), p).toBe(true);
+    for (const p of [...contentPages(), "contact.html", "404.html"]) expect(existsSync(join(OUT, p)), p).toBe(true);
     expect(readdirSync(join(OUT, "l")).filter((f) => f.endsWith(".html")).length).toBe(7);
   });
 
@@ -110,6 +113,18 @@ describe.skipIf(!run)("built pages follow the ads configuration (AC-1..AC-9, AC-
     expect((h.match(/<main\b/g) ?? []).length).toBe(1);
   });
 
+  it("the Contact page has no ads and no loader, no Google host, and owns main#main, ads on or off (AC-11, AC-32)", () => {
+    const h = html("contact.html");
+    expect(loaders(h)).toBe(0);
+    expect(h).not.toMatch(/adsbygoogle|googlesyndication|doubleclick|ad-box|class="ad-label"|<aside\b[^>]*class="ad /);
+    expect(h).not.toContain("data-ad-client");
+    expect(h).not.toContain("has-rails");
+    expect(h.match(/https?:\/\/[a-z0-9.-]*(?:google|doubleclick)[a-z0-9.-]*/gi)).toBeNull();
+    expect(h).toContain('<main id="main"');
+    expect((h.match(/<main\b/g) ?? []).length).toBe(1);
+    expect(h).toContain('href="mailto:');
+  });
+
   it("ads.txt always holds the one exact line, for the configured client or the owner's publisher ID (AC-25)", () => {
     const want = adsTxtContent(cfg.client ?? ADSENSE_PUBLISHER_ID);
     expect(readFileSync(join(OUT, "ads.txt"), "utf8")).toBe(want);
@@ -123,10 +138,28 @@ describe.skipIf(!run)("built pages follow the ads configuration (AC-1..AC-9, AC-
     }
   });
 
-  it("every page, 404 included, has the footer Privacy link (AC-27)", () => {
+  it("every page, 404 and contact included, has the footer Privacy, About us, Contact and consent links (AC-1, AC-7, AC-24, AC-27)", () => {
     const pages = walk(OUT).map(rel);
-    expect(pages.length).toBeGreaterThanOrEqual(11);
-    for (const p of pages) expect(html(p), p).toMatch(/<footer[\s\S]*<a href="\/privacy">Privacy<\/a>[\s\S]*<\/footer>/);
+    expect(pages.length).toBeGreaterThanOrEqual(13);
+    expect(pages).toContain("404.html");
+    expect(pages).toContain("contact.html");
+    for (const p of pages) {
+      const footer = html(p).match(/<footer[\s\S]*<\/footer>/)?.[0] ?? "";
+      expect(footer, `${p}: footer`).not.toBe("");
+      for (const a of [
+        '<a href="/privacy">Privacy</a>',
+        '<a href="/about-us">About us</a>',
+        '<a href="/contact">Contact</a>',
+        '<a href="/privacy#pp-eea">Privacy and cookie settings</a>',
+      ]) {
+        expect(footer, `${p}: ${a}`).toContain(a);
+      }
+      // the header links too (AC-1, AC-7 on every page, 404 included)
+      const header = html(p).match(/<header[\s\S]*?<\/header>/)?.[0] ?? "";
+      // on the current page Next emits `aria-current="page"` before `href`, so attributes may sit on either side
+      expect(header, `${p}: header About us`).toMatch(/<a\b[^>]*href="\/about-us"[^>]*>About us<\/a>/);
+      expect(header, `${p}: header Contact`).toMatch(/<a\b[^>]*href="\/contact"[^>]*>Contact<\/a>/);
+    }
   });
 
   it("the Privacy page carries the required statements and safe links (AC-28, AC-24, TC-45)", () => {
@@ -141,7 +174,7 @@ describe.skipIf(!run)("built pages follow the ads configuration (AC-1..AC-9, AC-
       "Switzerland",
       "Privacy and cookie settings",
       "hadesvault.com",
-      "Last updated 1 Nov 2026",
+      `Last updated ${fmtDate(PRIVACY_UPDATED)}`, // the page's own date, so a Privacy text change never breaks this test
     ]) {
       expect(text.toLowerCase(), s).toContain(s.toLowerCase());
     }

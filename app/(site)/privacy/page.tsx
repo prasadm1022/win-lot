@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { fmtDate } from '@/components/util/format'
 import { JsonLd } from '@/components/JsonLd'
 import { pageJsonLd, pageMetadata } from '@/lib/seo'
 
 /** Date of the latest version of this policy (ISO); shown as "Last updated ..." at the end of the page. */
-export const PRIVACY_UPDATED = '2026-11-01'
+export const PRIVACY_UPDATED = '2026-11-04'
 
 const DESCRIPTION =
   'What WinLot stores on your device, who runs it, how Google ads use cookies across hadesvault.com, and how to change your choices.'
@@ -36,7 +37,7 @@ export default function PrivacyPage() {
             the rest of hadesvault.com.
           </p>
           <p>
-            For questions about this policy, use the <a href="https://hadesvault.com/contact">HadesVault.com contact page</a>.
+            For questions about this policy, use the <Link href="/contact">WinLot contact page</Link>.
           </p>
         </section>
 
@@ -50,7 +51,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="card prose" aria-labelledby="pp-ads">
-          <h2 id="pp-ads">Ads by Google</h2>
+          <h2 id="pp-ads">Google advertising</h2>
           <p>
             WinLot may show clearly labelled advertisements served by Google AdSense. When ads are on, Google and its partners use
             cookies or similar identifiers to show and measure ads. Third-party vendors, including Google, use cookies to serve ads
@@ -90,7 +91,7 @@ export default function PrivacyPage() {
           <p>
             If you visit from the European Economic Area, the United Kingdom or Switzerland, a consent message from a Google-certified
             consent platform asks for your choice before any personalised ad is shown. You can decline and still read everything on
-            WinLot. To change your choice later, use &quot;Privacy and cookie settings&quot; on any page.
+            WinLot. To change your choice later, use &quot;Privacy and cookie settings&quot; at the bottom of any page.
           </p>
         </section>
 

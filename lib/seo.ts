@@ -7,6 +7,18 @@ import type { DrawSummary, Lottery } from "./types";
 export const SITE_URL = "https://winlot.hadesvault.com";
 export const SITE_NAME = "WinLot";
 export const PUBLISHER = { name: "HadesVault.com", url: "https://hadesvault.com" } as const;
+/**
+ * The operator's contact details, WinLot's one copy of what hadesvault.com publishes (the Contact and About Us pages
+ * read it from here; the Privacy page links to /contact). Mirrored by hand from the portfolio repo
+ * (`portfolio-prasad-madusanka`): `email` is `site.email` in `app/lib/site.ts`, `location` is the "Based in" fact in
+ * `app/components/Contact.tsx`. test/contact.test.ts compares both against the sibling checkout when it is present.
+ */
+export const CONTACT = {
+  operator: PUBLISHER.name,
+  email: "prasadmupwork@gmail.com",
+  location: "Colombo, Sri Lanka",
+  url: `${PUBLISHER.url}/contact`,
+} as const;
 /** Social share image (public/og.png, 1200 x 630). */
 export const OG_IMAGE = { url: "/og.png", width: 1200, height: 630, alt: "WinLot - Sri Lanka lottery predictions, NLB and DLB" };
 

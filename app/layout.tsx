@@ -2,6 +2,7 @@
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
+import { ConsentSettingsLink } from '@/components/ConsentSettingsLink'
 import { NavLinks } from '@/components/NavLinks'
 import { LogoMark } from '@/components/LogoMark'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -61,10 +62,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               WinLot
               <span className="brand-tag">Sri Lanka</span>
             </Link>
+            {/* Links only inside the landmark; the toggle sits beside it so the two-row phone header is brand + toggle / links. */}
             <nav className="site-nav" aria-label="Primary">
               <NavLinks />
-              <ThemeToggle />
             </nav>
+            <ThemeToggle />
           </div>
         </header>
         {children}
@@ -91,12 +93,24 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   <Link href="/about">How it works</Link>
                 </li>
                 <li>
+                  <Link href="/about-us">About us</Link>
+                </li>
+                <li>
+                  <Link href="/contact">Contact</Link>
+                </li>
+                <li>
                   <Link href="/privacy">Privacy</Link>
+                </li>
+                <li>
+                  {/* Rendered only, never imported for a value (lesson L9): it is a client component. */}
+                  <ConsentSettingsLink />
                 </li>
               </ul>
             </div>
             <div className="footer-bottom">
-              <span>Draws are random. Play responsibly.</span>
+              <span>
+                <strong className="age-badge">18+</strong> Lotteries are for adults only. Draws are random. Play responsibly.
+              </span>
               <span>
                 A project by <a href="https://hadesvault.com">HadesVault.com</a>
               </span>

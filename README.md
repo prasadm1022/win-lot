@@ -31,6 +31,8 @@ random, so the predictions are for fun.
   which have gone longest without appearing, common number pairs, how often each letter wins, and
   more. These describe past draws only; a draw has no memory, so none of it changes the next draw.
 - **Use it anywhere.** It works on phones, tablets and computers, in a dark or light look.
+- **Know who runs it.** The About us page (`/about-us`) says who runs WinLot and what it is not; the Contact page
+  (`/contact`) has one email address for corrections, privacy questions and ad concerns (no form, no ads).
 
 ## How does it work?
 

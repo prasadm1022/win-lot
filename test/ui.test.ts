@@ -26,6 +26,7 @@ import { DISCLAIMER_TEXT } from "../components/Notices";
 import { oddsFallback, PartsBar } from "../components/Picks";
 import { BallRow } from "../components/Ball";
 import { bonusLabelOf, bonusText, fmtDate, fmtDateShort, fmtDateTime, fmtMonth, fmtMonthYear } from "../components/util/format";
+import { FORBIDDEN } from "./helpers/copy-rules";
 
 const render = (el: Parameters<typeof renderToStaticMarkup>[0]) => renderToStaticMarkup(el);
 const text = (html: string) =>
@@ -35,7 +36,6 @@ const text = (html: string) =>
     .replace(/&#x27;|&#39;/g, "'")
     .replace(/\s+/g, " ")
     .trim();
-const FORBIDDEN = [/more likely/i, /better odds/i, /better chance/i, /\bbeats?\b/i, /lucky day/i, /\bdue\b/i, /overdue/i, /\bhot\b/i, /guarantee/i, /accuracy/i, /affinity/i, /jackpot-likeness/i];
 
 describe("disclaimer", () => {
   it("is the model's disclaimer, word for word, everywhere it is shown", () => {
@@ -611,7 +611,12 @@ describe("privacy page, footer and 404", () => {
     expect(html).toContain('href="https://policies.google.com/technologies/partner-sites"');
     expect(html.match(/rel="noopener noreferrer"/g)).toHaveLength(2);
     expect(html).toContain('href="https://hadesvault.com/privacy"');
-    expect(html).toContain('href="https://hadesvault.com/contact"');
+    expect(html).not.toContain('href="https://hadesvault.com/contact"');
+    expect(html).toContain('<a href="/contact">WinLot contact page</a>');
+    expect(t).toContain('To change your choice later, use "Privacy and cookie settings" at the bottom of any page.');
+    expect(t).toContain("Google advertising");
+    expect(t).not.toMatch(/ads by google/i);
+    expect(PRIVACY_UPDATED).toBe("2026-11-04");
     expect(t).toContain("Every site on hadesvault.com uses the same Google AdSense account.");
     expect(t).toContain("WinLot has no accounts, no sign-up and no forms.");
     expect(t).toContain("European Economic Area");
@@ -632,6 +637,78 @@ describe("privacy page, footer and 404", () => {
     expect(footer).toContain('<a href="/privacy">Privacy</a>');
     expect(html).toContain('<a href="#main" class="skip-link">Skip to content</a>');
     expect(html).not.toContain("<main");
+  });
+
+  it("puts About us, Contact and the consent settings link in the footer of every page, after Privacy", () => {
+    const html = render(createElement(RootLayout, null, "X"));
+    const footer = html.slice(html.indexOf('<footer class="site-footer">'));
+    const links = [...footer.matchAll(/<a href="([^"]+)">([^<]+)<\/a>/g)].map((m) => [m[1], m[2]]);
+    expect(links.filter(([href]) => href.startsWith("/"))).toEqual([
+      ["/", "All lotteries"],
+      ["/about", "How it works"],
+      ["/about-us", "About us"],
+      ["/contact", "Contact"],
+      ["/privacy", "Privacy"],
+      ["/privacy#pp-eea", "Privacy and cookie settings"],
+    ]);
+    // The consent link is a plain anchor (progressively enhanced on the client): no role=button, no script of its own.
+    expect(footer).toContain('<a href="/privacy#pp-eea">Privacy and cookie settings</a>');
+    expect(footer).not.toMatch(/role="button"|<script/);
+  });
+
+  it("states the 18+ age line in the footer bottom, as real text with the badge inside the sentence", () => {
+    const html = render(createElement(RootLayout, null, "X"));
+    const footer = html.slice(html.indexOf('<footer class="site-footer">'));
+    expect(footer).toContain('<strong class="age-badge">18+</strong> Lotteries are for adults only. Draws are random. Play responsibly.');
+    expect(text(footer)).toContain("18+ Lotteries are for adults only. Draws are random. Play responsibly.");
+    expect(text(footer)).toContain("A project by HadesVault.com");
+    expect(footer).not.toMatch(/aria-label="18/);
+  });
+
+  it("orders the header links Home, How it works, About us, Contact, Privacy inside the nav landmark, with the toggle beside it", () => {
+    const html = render(createElement(RootLayout, null, "X"));
+    const header = html.slice(html.indexOf('<header class="site-header">'), html.indexOf("</header>"));
+    const nav = header.slice(header.indexOf('<nav class="site-nav" aria-label="Primary">'), header.indexOf("</nav>"));
+    const links = [...nav.matchAll(/<a[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/g)].map((m) => [m[1], m[2]]);
+    expect(links).toEqual([
+      ["/", "Home"],
+      ["/about", "How it works"],
+      ["/about-us", "About us"],
+      ["/contact", "Contact"],
+      ["/privacy", "Privacy"],
+    ]);
+    expect(nav).toContain('class="nav-home"');
+    expect(nav).not.toContain("<button");
+    // the theme toggle follows the nav as a sibling (two-row phone header: brand + toggle, then the links)
+    expect(header).toMatch(/<\/nav><button type="button" class="icon-btn"/);
+  });
+
+  it("pins the header CSS: labels never wrap, the toggle never shrinks, two rows at <= 760 px, links spread at <= 420 px; the age badge uses the tokens (D1)", () => {
+    const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
+    const block = (q: string) => {
+      const at = css.indexOf(`@media (${q})`);
+      expect(at, q).toBeGreaterThan(-1);
+      return css.slice(at, css.indexOf("\n}\n", at));
+    };
+    const base = css.slice(css.indexOf("/* ---------- Header ---------- */"), css.indexOf("/* ---------- Footer ---------- */"));
+    // D1 root cause: five nowrap-less labels broke onto 2-3 lines between 601 and ~740 px and the toggle shrank to 32 px
+    expect(base).toMatch(/\.site-nav a \{[^}]*white-space: nowrap/);
+    expect(base).toMatch(/\.icon-btn \{[^}]*flex-shrink: 0/);
+    // the one-row header needs ~670 px of container, so the two-row layout (brand + toggle, then the full-width nav) covers the whole band
+    const twoRow = block("max-width: 760px");
+    expect(twoRow).toMatch(/\.site-header \.container \{[^}]*flex-wrap: wrap/);
+    expect(twoRow).toMatch(/\.site-header \.icon-btn \{[^}]*order: 2;[^}]*margin-left: auto/);
+    expect(twoRow).toMatch(/\.site-nav \{[^}]*order: 3;[^}]*width: 100%;[^}]*margin-left: 0;[^}]*justify-content: flex-end/);
+    // no wrapping rule anywhere in the header blocks: a nav that wraps is what orphaned the toggle
+    for (const q of ["max-width: 760px", "max-width: 600px", "max-width: 420px"]) expect(block(q), q).not.toMatch(/\.site-nav \{[^}]*flex-wrap/);
+    expect(block("max-width: 600px")).toMatch(/\.site-nav a\.nav-home \{[^}]*display: none/);
+    const small = block("max-width: 420px");
+    expect(small).toMatch(/\.site-nav \{[^}]*justify-content: space-between/);
+    expect(small).toMatch(/\.site-nav a \{[^}]*padding: 8px 6px/);
+    expect(css).toMatch(/\.age-badge \{[^}]*background: var\(--surface-2\);[^}]*color: var\(--ink\)/);
+    expect(css).toMatch(/\.policy-grid \.card \{[^}]*scroll-margin-top: 72px/);
+    // the section ids are on the h2 (privacy #pp-eea, the consent link's target): it needs its own margin under the sticky header
+    expect(css).toMatch(/\.policy-grid \.card h2 \{[^}]*scroll-margin-top: 92px/);
   });
 
   it("gives the 404 page its own <main id=\"main\"> (skip-link target) and no ad markup", () => {

@@ -6,10 +6,12 @@ import { usePathname } from 'next/navigation'
 const LINKS = [
   // "Home" hides on narrow phones (CSS .nav-home): the logo beside it already links home
   { href: '/', label: 'Home', className: 'nav-home' },
+  { href: '/guides', label: 'Guides' },
   { href: '/about', label: 'How it works' },
   { href: '/about-us', label: 'About us' },
   { href: '/contact', label: 'Contact' },
-  { href: '/privacy', label: 'Privacy' },
+  // "Privacy" hides on narrow phones too (CSS .nav-privacy): the footer links it on every page
+  { href: '/privacy', label: 'Privacy', className: 'nav-privacy' },
 ]
 
 /** Primary nav links with aria-current for the active route. */

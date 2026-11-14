@@ -90,6 +90,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   <Link href="/">All lotteries</Link>
                 </li>
                 <li>
+                  <Link href="/guides">Guides</Link>
+                </li>
+                <li>
                   <Link href="/about">How it works</Link>
                 </li>
                 <li>

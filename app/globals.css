@@ -301,7 +301,7 @@ button {
   border-radius: var(--radius-sm);
   font-weight: 500;
   font-size: 0.92rem;
-  white-space: nowrap; /* a label never breaks onto two lines; the header switches to two rows instead (<= 760 px) */
+  white-space: nowrap; /* a label never breaks onto two lines; the header switches to two rows instead (<= 860 px) */
 }
 .site-nav a:hover {
   color: var(--ink);
@@ -2068,10 +2068,10 @@ table.history td.num {
     grid-template-columns: 1fr;
   }
 }
-/* Two header rows below 760 px: brand + theme toggle first, then the links on their own full-width row, right-aligned.
-   One row needs ~670 px of container (brand 193 + nav 416 + toggle 30 + two 16 px gaps); the container reaches that at
-   ~740 px, so 760 keeps a margin for font fallbacks. Labels never wrap (nowrap above) and the toggle never shrinks. */
-@media (max-width: 760px) {
+/* Two header rows below 860 px: brand + theme toggle first, then the links on their own full-width row, right-aligned.
+   One row needs ~745 px of container (brand 193 + six links ~490 + toggle 30 + two 16 px gaps); the container reaches
+   that at ~815 px, so 860 keeps a margin for font fallbacks. Labels never wrap (nowrap above) and the toggle never shrinks. */
+@media (max-width: 860px) {
   .site-header .container {
     flex-wrap: wrap;
     row-gap: 0;
@@ -2100,8 +2100,9 @@ table.history td.num {
     padding: 8px 9px;
     font-size: 0.88rem;
   }
-  .site-nav a.nav-home {
-    display: none;
+  .site-nav a.nav-home,
+  .site-nav a.nav-privacy {
+    display: none; /* the logo links home and the footer links Privacy on every page */
   }
   .brand-tag {
     display: none;
@@ -2170,7 +2171,7 @@ table.history td.num {
     min-width: 900px;
   }
 }
-/* Small phones: the four visible links spread across the full width (the two-row layout comes from the 760 px block).
+/* Small phones: the four visible links spread across the full width (the two-row layout comes from the 860 px block).
    Links keep 8 px vertical padding (~36 px tall, >= 55 px wide), so every target stays over 24 x 24 px. */
 @media (max-width: 420px) {
   .site-nav {
@@ -2276,6 +2277,152 @@ table.history td.num {
   .policy-grid {
     display: grid;
     gap: 14px;
+  }
+}
+
+/* ---------- Guides, results archives and the lottery guide ---------- */
+.page-links {
+  margin: 8px 0 0;
+  color: var(--ink-3);
+}
+.archive-link {
+  margin: 12px 0 0;
+}
+.archive-link a,
+.page-links a {
+  font-weight: 600;
+}
+.lottery-guide,
+.article {
+  max-width: none; /* full-width cards like their neighbours; paragraphs keep a reading measure */
+}
+.lottery-guide > p,
+.lottery-guide > ul,
+.article > p,
+.article > ul,
+.article > ol,
+.article-head {
+  max-width: 72ch;
+}
+.lottery-guide h3,
+.article h2 {
+  margin-top: 1.4em;
+}
+.article h2 {
+  font-size: 1.25rem;
+}
+.lottery-guide h3 {
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+.lottery-guide h2 {
+  margin-bottom: 4px;
+}
+.article-head h1 {
+  margin-bottom: 6px;
+}
+.article-meta {
+  margin: 0 0 12px;
+}
+.article-lede {
+  font-size: 1.05rem;
+  color: var(--ink);
+  line-height: 1.6;
+}
+.article-callout {
+  border-left: 3px solid var(--accent);
+  padding: 8px 14px;
+  background: var(--surface-2);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--ink);
+}
+.article li + li {
+  margin-top: 4px;
+}
+.guide-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+}
+.guide-list h3 {
+  font-size: 1.05rem;
+  margin: 0 0 2px;
+}
+.guide-list p {
+  margin: 4px 0 0;
+  max-width: 80ch;
+}
+.archive-board h3 {
+  font-size: 0.95rem;
+  margin: 16px 0 8px;
+}
+.year-jump {
+  margin-top: 8px;
+  line-height: 1.9;
+}
+.results-notes p {
+  max-width: 80ch;
+}
+.results-notes {
+  max-width: none;
+}
+.results-year {
+  scroll-margin-top: 72px; /* a year anchor lands below the sticky header */
+}
+table.results-table,
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+table.results-table th,
+table.results-table td,
+table.data-table th,
+table.data-table td {
+  text-align: left;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+table.results-table th,
+table.results-table td {
+  white-space: nowrap; /* the wrapper scrolls sideways on phones instead */
+}
+table.results-table th,
+table.data-table th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+table.results-table td.num,
+table.data-table td.num {
+  font-variant-numeric: tabular-nums;
+}
+table.results-table .res-numbers {
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  font-weight: 600;
+}
+table.results-table .res-letter {
+  font-weight: 700;
+  color: var(--ink);
+}
+table.results-table tr.row-won td {
+  background: var(--accent-soft);
+}
+table.data-table {
+  margin: 8px 0 12px;
+}
+@media (max-width: 600px) {
+  table.results-table th,
+  table.results-table td,
+  table.data-table th,
+  table.data-table td {
+    padding: 6px 6px;
   }
 }
 

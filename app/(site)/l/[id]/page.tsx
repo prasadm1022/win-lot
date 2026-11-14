@@ -2,7 +2,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { LOTTERY_IDS, getDraws, getJackpotStatus, getLotteries, getLottery, getPrediction, getStatus } from '@/lib/data'
+import { LOTTERY_IDS, getDraws, getJackpotStatus, getLotteries, getLottery, getPrediction, getPrizeRows, getStatus } from '@/lib/data'
 import type { Lottery, Prediction } from '@/lib/types'
 import { BOARD_SOURCE, lotteryJsonLd, pageMetadata, ticketText } from '@/lib/seo'
 import { JsonLd } from '@/components/JsonLd'
@@ -19,6 +19,7 @@ import { PickCards } from '@/components/Picks'
 import { HowPicksAreMade } from '@/components/HowPicksAreMade'
 import { JackpotWins } from '@/components/JackpotWins'
 import { LatestDrawJackpot } from '@/components/JackpotBadge'
+import { LotteryGuide } from '@/components/LotteryGuide'
 
 type Params = { id: string }
 
@@ -106,6 +107,10 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
             ) : null}
           </h1>
           <p className="page-intro">{introText(lottery)}</p>
+          <p className="page-links small">
+            <a href="#guide">{lottery.name} at a glance</a> · <Link href={`/l/${id}/results`}>Results archive</Link> ·{' '}
+            <Link href="/guides">Guides</Link>
+          </p>
         </div>
         {prediction ? (
           <div>
@@ -190,7 +195,17 @@ export default async function LotteryPage({ params }: { params: Promise<Params> 
           </p>
         </div>
         <HistoryTable id={id} initial={draws.slice(0, PAGE)} total={draws.length} bonusLabel={lottery.bonusLabel} />
+        {draws.length > 0 ? (
+          <p className="small archive-link">
+            <Link href={`/l/${id}/results`}>
+              All {fmtInt(draws.length)} {lottery.name} results on one page, grouped by year
+            </Link>
+          </p>
+        ) : null}
       </section>
+
+      {/* Reference: who runs it, when it is drawn, what a result looks like, where the official information lives */}
+      <LotteryGuide lottery={lottery} draws={draws} rows={getPrizeRows(id)} status={jackpots} />
 
       <nav className="card related" aria-labelledby="related-title">
         <h2 id="related-title">More Sri Lanka lottery predictions</h2>

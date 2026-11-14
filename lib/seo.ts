@@ -188,6 +188,75 @@ export function lotteryJsonLd(lottery: Lottery, description: string): object {
   };
 }
 
+/** A breadcrumb that starts at the home page ("All lotteries") and runs through `trail` (name + path) to the page. */
+const breadcrumbTrail = (trail: readonly { name: string; path: string }[]) => {
+  const path = trail[trail.length - 1].path;
+  return {
+    "@type": "BreadcrumbList",
+    "@id": `${absUrl(path)}#breadcrumb`,
+    itemListElement: [{ name: "All lotteries", path: "/" }, ...trail].map((t, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: t.name,
+      item: t.path === "/" ? SITE_URL : absUrl(t.path),
+    })),
+  };
+};
+
+/**
+ * A page below another page (a lottery's results archive, the Guides page): the page and its breadcrumb through
+ * `trail`, the last entry being the page itself.
+ */
+export function trailPageJsonLd(type: string, trail: readonly { name: string; path: string }[], description: string): object {
+  const page = trail[trail.length - 1];
+  return {
+    "@context": "https://schema.org",
+    "@graph": [webPage(type, page.path, page.name, description), breadcrumbTrail(trail)],
+  };
+}
+
+/**
+ * A guide article: the Article (written and published by HadesVault.com, about the NLB and DLB results), its web page
+ * and its breadcrumb (All lotteries > Guides > the article). Dates are YYYY-MM-DD; dateModified is the newest draw date
+ * the article's figures were computed from.
+ */
+export function articleJsonLd(a: {
+  path: string;
+  headline: string;
+  description: string;
+  datePublished: string;
+  dateModified: string;
+}): object {
+  const url = absUrl(a.path);
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "@id": `${url}#article`,
+        headline: a.headline,
+        description: a.description,
+        url,
+        mainEntityOfPage: { "@id": `${url}#webpage` },
+        datePublished: a.datePublished,
+        dateModified: a.dateModified < a.datePublished ? a.datePublished : a.dateModified,
+        inLanguage: "en",
+        image: absUrl(OG_IMAGE.url),
+        author: { "@id": ORG_ID },
+        publisher: { "@id": ORG_ID },
+        isBasedOn: Object.values(BOARD_SOURCE).map((s) => s.url),
+        about: Object.keys(BOARD_SOURCE).map((board) => boardOrg(board)),
+      },
+      organization,
+      webPage("WebPage", a.path, a.headline, a.description),
+      breadcrumbTrail([
+        { name: "Guides", path: "/guides" },
+        { name: a.headline, path: a.path },
+      ]),
+    ],
+  };
+}
+
 /** A plain page (How it works, Privacy) with its breadcrumb. */
 export function pageJsonLd(type: string, path: string, name: string, description: string): object {
   return {

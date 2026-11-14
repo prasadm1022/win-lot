@@ -69,7 +69,7 @@ function getJackpotItems(): Jackpot[] {
 const ownJackpots = memo((id: string): Jackpot[] => getJackpotItems().filter((j) => j.lotteryId === id));
 
 /** data/prizes/<id>.json: NLB per-draw jackpot rows, or DLB advertised next-draw jackpots. */
-const getPrizeRows = memo((id: string): PrizeRow[] => readJson<PrizeRow[]>(`prizes/${id}.json`, []));
+export const getPrizeRows = memo((id: string): PrizeRow[] => readJson<PrizeRow[]>(`prizes/${id}.json`, []));
 
 /**
  * A draw whose jackpot was won also carries `jackpot` (the lottery's own in-archive items, joined on drawNo). The

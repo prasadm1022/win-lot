@@ -645,6 +645,7 @@ describe("privacy page, footer and 404", () => {
     const links = [...footer.matchAll(/<a href="([^"]+)">([^<]+)<\/a>/g)].map((m) => [m[1], m[2]]);
     expect(links.filter(([href]) => href.startsWith("/"))).toEqual([
       ["/", "All lotteries"],
+      ["/guides", "Guides"],
       ["/about", "How it works"],
       ["/about-us", "About us"],
       ["/contact", "Contact"],
@@ -665,25 +666,27 @@ describe("privacy page, footer and 404", () => {
     expect(footer).not.toMatch(/aria-label="18/);
   });
 
-  it("orders the header links Home, How it works, About us, Contact, Privacy inside the nav landmark, with the toggle beside it", () => {
+  it("orders the header links Home, Guides, How it works, About us, Contact, Privacy inside the nav landmark, with the toggle beside it", () => {
     const html = render(createElement(RootLayout, null, "X"));
     const header = html.slice(html.indexOf('<header class="site-header">'), html.indexOf("</header>"));
     const nav = header.slice(header.indexOf('<nav class="site-nav" aria-label="Primary">'), header.indexOf("</nav>"));
     const links = [...nav.matchAll(/<a[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/g)].map((m) => [m[1], m[2]]);
     expect(links).toEqual([
       ["/", "Home"],
+      ["/guides", "Guides"],
       ["/about", "How it works"],
       ["/about-us", "About us"],
       ["/contact", "Contact"],
       ["/privacy", "Privacy"],
     ]);
     expect(nav).toContain('class="nav-home"');
+    expect(nav).toContain('class="nav-privacy"');
     expect(nav).not.toContain("<button");
     // the theme toggle follows the nav as a sibling (two-row phone header: brand + toggle, then the links)
     expect(header).toMatch(/<\/nav><button type="button" class="icon-btn"/);
   });
 
-  it("pins the header CSS: labels never wrap, the toggle never shrinks, two rows at <= 760 px, links spread at <= 420 px; the age badge uses the tokens (D1)", () => {
+  it("pins the header CSS: labels never wrap, the toggle never shrinks, two rows at <= 860 px, links spread at <= 420 px; the age badge uses the tokens (D1)", () => {
     const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
     const block = (q: string) => {
       const at = css.indexOf(`@media (${q})`);
@@ -694,14 +697,16 @@ describe("privacy page, footer and 404", () => {
     // D1 root cause: five nowrap-less labels broke onto 2-3 lines between 601 and ~740 px and the toggle shrank to 32 px
     expect(base).toMatch(/\.site-nav a \{[^}]*white-space: nowrap/);
     expect(base).toMatch(/\.icon-btn \{[^}]*flex-shrink: 0/);
-    // the one-row header needs ~670 px of container, so the two-row layout (brand + toggle, then the full-width nav) covers the whole band
-    const twoRow = block("max-width: 760px");
+    // the one-row header needs ~745 px of container (six links since Guides), so the two-row layout (brand + toggle, then
+    // the full-width nav) covers the whole band below 860 px
+    const twoRow = block("max-width: 860px");
     expect(twoRow).toMatch(/\.site-header \.container \{[^}]*flex-wrap: wrap/);
     expect(twoRow).toMatch(/\.site-header \.icon-btn \{[^}]*order: 2;[^}]*margin-left: auto/);
     expect(twoRow).toMatch(/\.site-nav \{[^}]*order: 3;[^}]*width: 100%;[^}]*margin-left: 0;[^}]*justify-content: flex-end/);
     // no wrapping rule anywhere in the header blocks: a nav that wraps is what orphaned the toggle
-    for (const q of ["max-width: 760px", "max-width: 600px", "max-width: 420px"]) expect(block(q), q).not.toMatch(/\.site-nav \{[^}]*flex-wrap/);
-    expect(block("max-width: 600px")).toMatch(/\.site-nav a\.nav-home \{[^}]*display: none/);
+    for (const q of ["max-width: 860px", "max-width: 600px", "max-width: 420px"]) expect(block(q), q).not.toMatch(/\.site-nav \{[^}]*flex-wrap/);
+    // narrow phones keep four links: Home (the logo links home) and Privacy (the footer links it) hide
+    expect(block("max-width: 600px")).toMatch(/\.site-nav a\.nav-home,\s*\.site-nav a\.nav-privacy \{[^}]*display: none/);
     const small = block("max-width: 420px");
     expect(small).toMatch(/\.site-nav \{[^}]*justify-content: space-between/);
     expect(small).toMatch(/\.site-nav a \{[^}]*padding: 8px 6px/);

@@ -7,6 +7,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { DISCLAIMER_TEXT } from "../components/Notices";
+import { ARTICLES } from "../lib/articles";
 import { SITE_URL } from "../lib/seo";
 import { FORBIDDEN, forbiddenHits } from "./helpers/copy-rules";
 
@@ -16,8 +17,20 @@ const required = process.env.REQUIRE_BUILT_PAGES === "1";
 const run = required || existsSync(join(OUT, "index.html"));
 const LOTTERY_IDS = ["ada-kotipathi", "dhana-nidhanaya", "govisetha", "kapruka", "mega-power", "shanida", "super-ball"];
 const LOTTERY_PAGES = LOTTERY_IDS.map((id) => `l/${id}.html`);
-/** The 12 indexable pages (AC-39) as out/ paths; the sitemap must list exactly their URLs (AC-40). */
-const INDEXABLE = ["index.html", ...LOTTERY_PAGES, "about.html", "about-us.html", "contact.html", "privacy.html"];
+const RESULTS_PAGES = LOTTERY_IDS.map((id) => `l/${id}/results.html`);
+const GUIDE_PAGES = ["guides.html", ...ARTICLES.map((a) => `guides/${a.slug}.html`)];
+/** The indexable pages (AC-39; the results archives and the guides added for the content review) as out/ paths; the
+ *  sitemap must list exactly their URLs (AC-40). */
+const INDEXABLE = [
+  "index.html",
+  ...LOTTERY_PAGES,
+  ...RESULTS_PAGES,
+  ...GUIDE_PAGES,
+  "about.html",
+  "about-us.html",
+  "contact.html",
+  "privacy.html",
+];
 const urlOf = (p: string): string => (p === "index.html" ? SITE_URL : `${SITE_URL}/${p.replace(/\.html$/, "")}`);
 
 const html = (rel: string): string => readFileSync(join(OUT, rel), "utf8");
@@ -118,7 +131,7 @@ describe.skipIf(!run)("built pages meet the AdSense content rules (AC-17, AC-19.
 });
 
 describe.skipIf(!run)("built pages are indexable the right way (AC-6, AC-39, AC-40)", () => {
-  it("each of the 12 indexable pages has a unique title, a unique description, one h1 and a winlot canonical (AC-39)", () => {
+  it("each indexable page has a unique title, a unique description, one h1 and a winlot canonical (AC-39)", () => {
     const titles = new Map<string, string>();
     const descriptions = new Map<string, string>();
     for (const p of INDEXABLE) {
@@ -152,7 +165,7 @@ describe.skipIf(!run)("built pages are indexable the right way (AC-6, AC-39, AC-
     for (const p of INDEXABLE) expect(html(p), `${p}: header links How it works`).toMatch(/<header[\s\S]*<a\b[^>]*href="\/about"[^>]*>How it works<\/a>/);
   });
 
-  it("the sitemap lists exactly the 12 indexable URLs, the 404 page excluded (AC-40)", () => {
+  it("the sitemap lists exactly the indexable URLs, the 404 page excluded (AC-40)", () => {
     const xml = readFileSync(join(OUT, "sitemap.xml"), "utf8");
     const locs = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
     expect(locs.length).toBe(INDEXABLE.length);

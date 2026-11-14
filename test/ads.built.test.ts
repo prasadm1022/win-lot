@@ -5,6 +5,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { ARTICLES } from "../lib/articles";
 import { ADSENSE_PUBLISHER_ID, adsLoaderSrc, adsTxtContent, parseAdsConfig, type AdPosition } from "../lib/ads";
 import { DISCLAIMER_TEXT } from "../components/Notices";
 import { fmtDate } from "../components/util/format";
@@ -38,7 +39,16 @@ const walk = (dir: string, acc: string[] = []): string[] => {
 };
 const rel = (p: string) => p.slice(OUT.length + 1).replace(/\\/g, "/");
 /** Pages under app/(site)/, the ones AdFrame wraps; contact.html and 404.html live outside the group and get no ads. */
-const contentPages = (): string[] => ["index.html", "about.html", "about-us.html", "privacy.html", ...LOTTERY_IDS.map((id) => `l/${id}.html`)];
+const contentPages = (): string[] => [
+  "index.html",
+  "about.html",
+  "about-us.html",
+  "privacy.html",
+  "guides.html",
+  ...ARTICLES.map((a) => `guides/${a.slug}.html`),
+  ...LOTTERY_IDS.map((id) => `l/${id}.html`),
+  ...LOTTERY_IDS.map((id) => `l/${id}/results.html`),
+];
 const positionsIn = (h: string): string[] => [...h.matchAll(/<aside\b[^>]*class="ad ad-(top|left|right|bottom)\b/g)].map((m) => m[1]);
 const loaders = (h: string): number => (h.match(/<script[^>]*adsbygoogle\.js/g) ?? []).length;
 

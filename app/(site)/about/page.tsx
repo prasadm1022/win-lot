@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { LOTTERY_IDS, getLotteries, getPrediction, getStatus } from '@/lib/data'
 import type { BacktestDetail, Board } from '@/lib/types'
 import { fmtDateTime, fmtMonthYear } from '@/components/util/format'
@@ -126,6 +127,10 @@ export default function AboutPage() {
             tickets were sold, not on which balls fall, so jackpot combinations and dates tell us about the players. Leaning toward the
             patterns of past winning tickets cannot raise your odds and may mean sharing a prize with players who lean the same way.
             Treat the picks as a fun, data-driven way to choose numbers you would otherwise pick at random.
+          </p>
+          <p>
+            A step-by-step walk through the method with the latest figures for every lottery is in the guide{' '}
+            <Link href="/guides/how-winlot-makes-its-picks">How WinLot builds its picks and checks itself</Link>.
           </p>
           <h3 id="v1-title">Previous model (v1)</h3>
           <p className="small">

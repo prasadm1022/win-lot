@@ -165,6 +165,13 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+        <p>
+          New to the results? The <Link href="/guides">guides</Link> explain{' '}
+          <Link href="/guides/how-to-read-lottery-results">how to read a result</Link>, the{' '}
+          <Link href="/guides/jackpot-wins-history">record of jackpot wins</Link> and{' '}
+          <Link href="/guides/number-frequency-and-gaps">what number frequency can and cannot tell you</Link>, and every lottery
+          has a full results archive grouped by year.
+        </p>
         <p className="small muted">
           WinLot is independent and not affiliated with either board. Always check a ticket against the official result on nlb.lk
           or dlb.lk before claiming a prize.

@@ -32,7 +32,7 @@ export default function PrivacyPage() {
           <h2 id="pp-who">Who runs WinLot</h2>
           <p>
             WinLot is a project by <a href="https://hadesvault.com">HadesVault.com</a>, a software studio in Sri Lanka, and lives
-            at winlot.hadesvault.com. It is one of the sites HadesVault.com hosts under its domain, and all of them follow the
+            at win-lot.pages.dev. It is one of the sites HadesVault.com hosts under its domain, and all of them follow the
             same rules for ads and cookies. The <a href="https://hadesvault.com/privacy">HadesVault.com privacy policy</a> covers
             the rest of hadesvault.com.
           </p>

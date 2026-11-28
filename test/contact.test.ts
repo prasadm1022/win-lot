@@ -123,7 +123,7 @@ describe("contact page", () => {
       expect(contactHtml).toContain(`<section class="card prose" aria-labelledby="${id}"><h2 id="${id}">`);
     }
     expect(contactHtml).toContain('"@type":"ContactPage"');
-    expect(contactHtml).toContain('"url":"https://winlot.hadesvault.com/contact"');
+    expect(contactHtml).toContain('"url":"https://win-lot.pages.dev/contact"');
   });
 
   it("keeps to the copy rules: no odds language, no gambling invitations, no click requests, no placeholder", () => {

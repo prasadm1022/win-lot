@@ -77,7 +77,7 @@ describe("about us page", () => {
     }
     expect(html.match(/<h2/g)).toHaveLength(5);
     expect(html).toContain('"@type":"AboutPage"');
-    expect(html).toContain('"url":"https://winlot.hadesvault.com/about-us"');
+    expect(html).toContain('"url":"https://win-lot.pages.dev/about-us"');
   });
 
   it("keeps to the copy rules: no odds language, no gambling invitations, no click requests, no Google branding", () => {

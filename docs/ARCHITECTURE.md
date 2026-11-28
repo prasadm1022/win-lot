@@ -42,7 +42,7 @@ Cloudflare static assets serve out/  (/l/govisetha -> l/govisetha.html, unknown 
   its final size by CSS so content never moves, Google's `<ins>`); rails mount the `<ins>` only once the viewport is
   at least 1600 px wide and never unmount it, because `adsbygoogle.push({})` fills the first unprocessed `<ins>` in
   the document. Ad CSS: the "Ads" section at the end of `app/globals.css` (box sizes per breakpoint, rail placement).
-- Search (SEO): `lib/seo.ts` holds the canonical origin (`https://winlot.hadesvault.com`), `pageMetadata()` (title,
+- Search (SEO): `lib/seo.ts` holds the canonical origin (`https://win-lot.pages.dev`), `pageMetadata()` (title,
   description, canonical, Open Graph and Twitter card, all pointing at the same URL; share image `public/og.png`) and the
   schema.org JSON-LD graphs (`WebSite` + `Organization` on home, `WebPage` + `BreadcrumbList` + a `Dataset` of the draw
   archive with its `/data/<id>.json` download on each lottery page), rendered by `components/JsonLd.tsx`.
@@ -254,6 +254,6 @@ page carries `<meta name="google-adsense-account">` with `ADSENSE_PUBLISHER_ID` 
 and `next build` always emits `out/ads.txt` (`google.com, pub-<digits>, DIRECT, f08c47fec0942fa0`) from
 `app/ads.txt/route.ts` for the configured client, else that ID. The prebuild prints `ads: off (...)` or
 `ads: on (...)` plus any `WARNING ads:` line. hadesvault.com's own `/ads.txt` lists this site with
-`subdomain=winlot.hadesvault.com`.
+`subdomain=win-lot.pages.dev`.
 Consent for EEA/UK/CH visitors, Auto ads (off) and blocked ad categories are AdSense account settings of the owner.
 Free-plan limits: see README.

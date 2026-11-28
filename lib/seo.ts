@@ -4,7 +4,7 @@
 import type { Metadata } from "next";
 import type { DrawSummary, Lottery } from "./types";
 
-export const SITE_URL = "https://winlot.hadesvault.com";
+export const SITE_URL = "https://win-lot.pages.dev";
 export const SITE_NAME = "WinLot";
 export const PUBLISHER = { name: "HadesVault.com", url: "https://hadesvault.com" } as const;
 /**
@@ -32,7 +32,7 @@ export const BOARD_NAME: Record<string, string> = Object.fromEntries(
   Object.entries(BOARD_SOURCE).map(([board, s]) => [board, s.name]),
 );
 
-/** A path resolved against the canonical origin, unslashed ("/" -> "https://winlot.hadesvault.com"). */
+/** A path resolved against the canonical origin, unslashed ("/" -> "https://win-lot.pages.dev"). */
 export const absUrl = (path: string): string => new URL(path, SITE_URL).toString().replace(/\/$/, "");
 
 /**

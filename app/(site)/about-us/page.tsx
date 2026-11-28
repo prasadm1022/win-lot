@@ -36,7 +36,7 @@ export default function AboutUsPage() {
           <h2 id="au-who">Who runs WinLot</h2>
           <p>
             WinLot is a project by <a href="https://hadesvault.com">{CONTACT.operator}</a>, a software studio in{' '}
-            {CONTACT.location}. {CONTACT.operator} builds and hosts it at winlot.hadesvault.com and is responsible for
+            {CONTACT.location}. {CONTACT.operator} builds and hosts it at win-lot.pages.dev and is responsible for
             everything on it.
           </p>
           <p>

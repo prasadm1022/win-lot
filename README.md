@@ -1,6 +1,6 @@
 # WinLot
 
-**Visit the site: [https://winlot.hadesvault.com](https://winlot.hadesvault.com)**
+**Visit the site: [https://win-lot.pages.dev](https://win-lot.pages.dev)**
 
 *A project by [HadesVault.com](https://hadesvault.com).*
 
